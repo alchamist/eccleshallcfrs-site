@@ -72,17 +72,13 @@ p  { color: var(--muted); }
 }
 .nav { display: flex; align-items: center; justify-content: space-between; height: var(--nav-h); }
 .nav-logo {
-  display: flex; align-items: center; gap: 0.6rem;
-  font-size: 1rem; font-weight: 700; color: var(--green);
+  display: flex; align-items: center;
   text-decoration: none; flex-shrink: 0;
 }
-.nav-logo:hover { text-decoration: none; color: var(--green); }
-.logo-icon {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--green-2); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; font-weight: 800; flex-shrink: 0;
-}
+.nav-logo:hover { text-decoration: none; opacity: 0.85; }
+.nav-logo-img { height: 44px; width: auto; display: block; }
+.site-footer .nav-logo-img { height: 36px; }
+@media (max-width: 768px) { .nav-logo-img { height: 36px; } }
 .nav-links { display: flex; gap: 1.75rem; align-items: center; }
 .nav-links a { color: var(--muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.15s; }
 .nav-links a:hover, .nav-links a.active { color: var(--green); }
