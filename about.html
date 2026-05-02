@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About – Eccleshall Community First Responders</title>
+  <meta name="description" content="Learn about Eccleshall Community First Responders — trained volunteers responding to 999 calls in the local community.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="container nav">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">+</div>
+      Eccleshall CFRs
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="volunteer.html">Volunteer</a></li>
+      <li><a href="updates.html">Updates</a></li>
+      <li><a href="donate.html" class="btn btn-red">Donate</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>About Eccleshall CFRs</h1>
+      <p>Trained volunteers saving lives in our community since the scheme began.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="max-width:740px;">
+        <h2>What We Do</h2>
+        <p style="margin-top:0.75rem;">Eccleshall Community First Responders (CFRs) are a group of volunteers trained by West Midlands Ambulance Service to a nationally recognised level. We provide life-saving treatment to people in the local community while waiting for the ambulance to arrive.</p>
+        <p style="margin-top:0.75rem;">We respond to 999 calls in the Eccleshall area, giving medical aid — including CPR and defibrillation — until the Ambulance Service arrive on scene. Every minute without treatment in a cardiac arrest dramatically reduces survival chances, so having trained responders nearby makes a real difference.</p>
+
+        <h2 style="margin-top:2.5rem;">Our Training</h2>
+        <p style="margin-top:0.75rem;">All our responders are trained by West Midlands Ambulance Service. Training covers CPR, AED (defibrillator) use, airway management, and a range of medical emergencies. This training is provided free to volunteers and is updated regularly to maintain nationally recognised standards.</p>
+
+        <h2 style="margin-top:2.5rem;">Queen's Award for Voluntary Service</h2>
+        <p style="margin-top:0.75rem;">On 2nd June 2017, Eccleshall CFRs were awarded the <strong>Queen's Award for Voluntary Service</strong> — the highest award given to local volunteer groups across the UK. The citation recognised our work in providing emergency medical aid, training, and lifesaving equipment to those living and working in the local community.</p>
+
+        <h2 style="margin-top:2.5rem;">How We're Funded</h2>
+        <p style="margin-top:0.75rem;">We receive no funding from central sources. Our volunteers give their time for operations and training freely. The money needed for day-to-day running costs, equipment, uniforms, and our vehicle is raised through fundraising events and public donations.</p>
+        <a href="donate.html" class="btn btn-red" style="margin-top:1.25rem;">Support us</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">
+          <div class="logo-icon">+</div>
+          Eccleshall CFRs
+        </a>
+        <p style="margin-top:0.6rem;">Trained volunteers providing emergency medical aid to Eccleshall and surrounding communities.</p>
+        <div class="footer-social">
+          <a href="https://facebook.com/131270403575068" class="social-btn" aria-label="Facebook" target="_blank" rel="noopener">f</a>
+          <a href="https://twitter.com/eccleshallcfrs" class="social-btn" aria-label="Twitter/X" target="_blank" rel="noopener">𝕏</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="volunteer.html">Volunteer</a></li>
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="updates.html">Updates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Emergency</h4>
+        <ul class="footer-links">
+          <li>Medical emergency: <strong style="color:#fff;">999</strong></li>
+          <li>Non-urgent: <strong style="color:#fff;">111</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Eccleshall Community First Responders</p>
+      <span class="charity-no">Registered Charity No. 1119804</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    var t = document.querySelector('.nav-toggle');
+    var m = document.querySelector('.nav-links');
+    if (t && m) t.addEventListener('click', function() {
+      var open = m.classList.toggle('open');
+      t.setAttribute('aria-expanded', String(open));
+    });
+  })();
+</script>
+</body>
+</html>

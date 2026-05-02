@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update – Eccleshall Community First Responders</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="container nav">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">+</div>
+      Eccleshall CFRs
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="volunteer.html">Volunteer</a></li>
+      <li><a href="updates.html" class="active">Updates</a></li>
+      <li><a href="donate.html" class="btn btn-red">Donate</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container">
+      <div id="update-content">
+        <div class="loading-state"><div class="spinner"></div><p>Loading…</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">
+          <div class="logo-icon">+</div>
+          Eccleshall CFRs
+        </a>
+        <p style="margin-top:0.6rem;">Trained volunteers providing emergency medical aid to Eccleshall and surrounding communities.</p>
+        <div class="footer-social">
+          <a href="https://facebook.com/131270403575068" class="social-btn" aria-label="Facebook" target="_blank" rel="noopener">f</a>
+          <a href="https://twitter.com/eccleshallcfrs" class="social-btn" aria-label="Twitter/X" target="_blank" rel="noopener">𝕏</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="volunteer.html">Volunteer</a></li>
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="updates.html">Updates</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Emergency</h4>
+        <ul class="footer-links">
+          <li>Medical emergency: <strong style="color:#fff;">999</strong></li>
+          <li>Non-urgent: <strong style="color:#fff;">111</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Eccleshall Community First Responders</p>
+      <span class="charity-no">Registered Charity No. 1119804</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+<script src="js/updates.js"></script>
+<script>
+  (function() {
+    var t = document.querySelector('.nav-toggle');
+    var m = document.querySelector('.nav-links');
+    if (t && m) t.addEventListener('click', function() {
+      var open = m.classList.toggle('open');
+      t.setAttribute('aria-expanded', String(open));
+    });
+  })();
+  initSingleUpdate('update-content');
+</script>
+</body>
+</html>

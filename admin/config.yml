@@ -6,16 +6,26 @@ backend:
   auth_endpoint: auth
   site_domain: eccleshallcfrs-site.pages.dev
 
-media_folder: "src/images/uploads"
+media_folder: "images/uploads"
 public_folder: "/images/uploads"
 
 collections:
   - name: "updates"
     label: "Updates"
-    folder: "src/updates"
+    label_singular: "Update"
+    folder: "updates"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime" }
+      - label: "Featured Image"
+        name: "image"
+        widget: "image"
+        required: false
+      - label: "Summary"
+        name: "summary"
+        widget: "string"
+        required: false
+        hint: "Short description shown on the updates list and homepage (optional — will fall back to body text if blank)"
       - { label: "Body", name: "body", widget: "markdown" }
