@@ -143,10 +143,8 @@ p  { color: var(--muted); }
 .fb-wrapper {
   max-width: 500px; margin: 0 auto;
   background: #fff; border-radius: var(--radius);
-  border: 1px solid var(--border); overflow: hidden; min-height: 300px;
+  border: 1px solid var(--border); overflow: hidden;
 }
-.fb-fallback { padding: 2rem; text-align: center; }
-.fb-fallback p { margin-bottom: 1rem; }
 
 /* ---- Donate strip ---- */
 .donate-strip { background: var(--red); color: #fff; padding: 3rem 0; text-align: center; }

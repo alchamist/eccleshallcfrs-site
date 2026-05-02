@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="fb-root"></div>
 
 <header class="site-header">
   <nav class="container nav">
@@ -60,20 +59,20 @@
         <p>Follow us on Facebook — that's where we post news, fundraisers, and updates from the team.</p>
       </div>
       <div class="fb-wrapper">
-        <div class="fb-page"
-          data-href="https://www.facebook.com/131270403575068"
-          data-tabs="timeline"
-          data-width="500"
-          data-height="600"
-          data-small-header="true"
-          data-adapt-container-width="true"
-          data-hide-cover="false"
-          data-show-facepile="false">
-          <div class="fb-fallback">
-            <p>Unable to load Facebook feed.</p>
-            <a href="https://www.facebook.com/131270403575068" target="_blank" rel="noopener" class="btn btn-primary">View on Facebook</a>
-          </div>
-        </div>
+        <iframe
+          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F131270403575068&tabs=timeline&width=500&height=600&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
+          width="500"
+          height="600"
+          style="border:none;overflow:hidden;max-width:100%;display:block;margin:0 auto;"
+          scrolling="no"
+          frameborder="0"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          loading="lazy"
+          title="Eccleshall CFRs on Facebook">
+        </iframe>
+      </div>
+      <div style="text-align:center;margin-top:1.25rem;">
+        <a href="https://www.facebook.com/131270403575068" target="_blank" rel="noopener" class="btn btn-outline">View our Facebook page →</a>
       </div>
     </div>
   </section>
@@ -142,8 +141,6 @@
   </div>
 </footer>
 
-<script async defer crossorigin="anonymous"
-  src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v21.0"></script>
 <script src="js/updates.js"></script>
 <script>
   (function() {
