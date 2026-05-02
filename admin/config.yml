@@ -3,13 +3,13 @@ backend:
   repo: alchamist/eccleshallcfrs-site
   branch: main
 
-media_folder: "images/uploads"
+media_folder: "src/images/uploads"
 public_folder: "/images/uploads"
 
 collections:
   - name: "updates"
     label: "Updates"
-    folder: "updates"
+    folder: "src/updates"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
