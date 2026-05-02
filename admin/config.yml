@@ -4,6 +4,7 @@ backend:
   branch: main
   base_url: https://ecfr-decap-oauth.alchamist.workers.dev
   auth_endpoint: auth
+  site_domain: eccleshallcfrs-site.pages.dev
 
 media_folder: "src/images/uploads"
 public_folder: "/images/uploads"
