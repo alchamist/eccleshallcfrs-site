@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found – Eccleshall Community First Responders</title>
+  <link rel="icon" type="image/png" href="images/ecfr-logo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="container nav">
+    <a href="index.html" class="nav-logo">
+      <img src="images/ecfr-logo.png" alt="Eccleshall Community First Responders" class="nav-logo-img">
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="volunteer.html">Volunteer</a></li>
+      <li><a href="updates.html">Updates</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="donate.html" class="btn btn-red">Donate</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section class="section" style="text-align:center;padding:6rem 0;">
+    <div class="container">
+      <p style="font-size:4rem;font-weight:800;color:var(--border);line-height:1;">404</p>
+      <h1 style="margin-top:0.5rem;margin-bottom:1rem;">Page not found</h1>
+      <p style="max-width:400px;margin:0 auto 2rem;">That page doesn't exist. You may have followed an old link or mistyped the address.</p>
+      <a href="index.html" class="btn btn-primary btn-lg">Back to home</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0;">
+      <p>© 2026 Eccleshall Community First Responders</p>
+      <span class="charity-no">Registered Charity No. 1119804</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    var t = document.querySelector('.nav-toggle');
+    var m = document.querySelector('.nav-links');
+    if (t && m) t.addEventListener('click', function() {
+      var open = m.classList.toggle('open');
+      t.setAttribute('aria-expanded', String(open));
+    });
+  })();
+</script>
+</body>
+</html>

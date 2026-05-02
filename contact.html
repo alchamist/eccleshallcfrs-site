@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact – Eccleshall Community First Responders</title>
+  <meta name="description" content="Get in touch with Eccleshall Community First Responders.">
+  <link rel="icon" type="image/png" href="images/ecfr-logo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="container nav">
+    <a href="index.html" class="nav-logo">
+      <img src="images/ecfr-logo.png" alt="Eccleshall Community First Responders" class="nav-logo-img">
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="volunteer.html">Volunteer</a></li>
+      <li><a href="updates.html">Updates</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+      <li><a href="donate.html" class="btn btn-red">Donate</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Get in Touch</h1>
+      <p>Questions about volunteering, donations, or anything else — we'd love to hear from you.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid-2" style="gap:3rem;align-items:start;">
+
+      <!-- Form -->
+      <div>
+        <h2 style="margin-bottom:1.25rem;">Send us a message</h2>
+        <!-- SETUP: Sign up free at formspree.io, create a form pointed at info@eccleshallcfrs.org.uk, then replace YOUR_FORM_ID below -->
+        <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="contact-form">
+          <div>
+            <label for="name">Your name</label>
+            <input type="text" id="name" name="name" required placeholder="Jane Smith" autocomplete="name">
+          </div>
+          <div>
+            <label for="email">Your email</label>
+            <input type="email" id="email" name="email" required placeholder="jane@example.com" autocomplete="email">
+          </div>
+          <div>
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" placeholder="Volunteering enquiry">
+          </div>
+          <div>
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required placeholder="How can we help?"></textarea>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary btn-lg">Send message</button>
+          </div>
+        </form>
+        <div id="form-status" style="margin-top:1rem;display:none;"></div>
+      </div>
+
+      <!-- Contact info -->
+      <div class="info-box">
+        <h3>Other ways to reach us</h3>
+        <ul>
+          <li>
+            <span>✉️</span>
+            <span><strong>Email</strong><br><a href="mailto:info@eccleshallcfrs.org.uk">info@eccleshallcfrs.org.uk</a></span>
+          </li>
+          <li>
+            <span>📘</span>
+            <span><strong>Facebook</strong><br><a href="https://www.facebook.com/131270403575068" target="_blank" rel="noopener">Follow us for the latest updates</a></span>
+          </li>
+          <li>
+            <span>🐦</span>
+            <span><strong>Twitter / X</strong><br><a href="https://twitter.com/eccleshallcfrs" target="_blank" rel="noopener">@eccleshallcfrs</a></span>
+          </li>
+        </ul>
+
+        <div style="margin-top:1.5rem;padding:1rem;background:var(--red);border-radius:var(--radius);">
+          <p style="color:#fff;font-weight:700;margin:0;">🚨 In an emergency, call <strong>999</strong> — do not contact us directly.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-name">Eccleshall CFRs</a>
+        <p>Trained volunteers providing emergency medical aid to Eccleshall and surrounding communities.</p>
+        <div class="footer-social">
+          <a href="https://facebook.com/131270403575068" class="social-btn" aria-label="Facebook" target="_blank" rel="noopener">f</a>
+          <a href="https://twitter.com/eccleshallcfrs" class="social-btn" aria-label="Twitter/X" target="_blank" rel="noopener">𝕏</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Pages</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="volunteer.html">Volunteer</a></li>
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="updates.html">Updates</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Emergency</h4>
+        <ul class="footer-links">
+          <li>Medical emergency: <strong style="color:#fff;">999</strong></li>
+          <li>Non-urgent: <strong style="color:#fff;">111</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Eccleshall Community First Responders</p>
+      <span class="charity-no">Registered Charity No. 1119804</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    var t = document.querySelector('.nav-toggle');
+    var m = document.querySelector('.nav-links');
+    if (t && m) t.addEventListener('click', function() {
+      var open = m.classList.toggle('open');
+      t.setAttribute('aria-expanded', String(open));
+    });
+
+    var form   = document.getElementById('contact-form');
+    var status = document.getElementById('form-status');
+
+    if (form) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+        try {
+          var res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          });
+          if (res.ok) {
+            form.style.display = 'none';
+            status.style.display = 'block';
+            status.innerHTML = '<div class="form-success">Thanks for your message — we\'ll be in touch soon.</div>';
+          } else {
+            throw new Error('Server error');
+          }
+        } catch(err) {
+          btn.disabled = false;
+          btn.textContent = 'Send message';
+          status.style.display = 'block';
+          status.innerHTML = '<div class="form-error">Something went wrong. Please email us directly at <a href="mailto:info@eccleshallcfrs.org.uk">info@eccleshallcfrs.org.uk</a>.</div>';
+        }
+      });
+    }
+  })();
+</script>
+</body>
+</html>
