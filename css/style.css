@@ -82,6 +82,7 @@ p  { color: var(--muted); }
 .nav-links { display: flex; gap: 1.75rem; align-items: center; }
 .nav-links a { color: var(--muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.15s; }
 .nav-links a:hover, .nav-links a.active { color: var(--green); }
+.nav-links a.btn-red, .nav-links a.btn-red:hover { color: #fff; }
 .nav-links .btn { padding: 0.45rem 1.1rem; font-size: 0.85rem; }
 .nav-toggle {
   display: none; flex-direction: column; gap: 5px;
