@@ -1,11 +1,271 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Content Manager – Eccleshall CFRs</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – Eccleshall CFRs</title>
+  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F5F7F5; color: #1A1A1A; min-height: 100vh; padding: 2rem 1rem; }
+    .wrap { max-width: 740px; margin: 0 auto; }
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .logo { height: 52px; }
+    .user-bar { font-size: 0.85rem; color: #6B7280; display: flex; align-items: center; gap: 0.75rem; }
+    .logout { background: none; border: none; color: #C62828; cursor: pointer; font-size: 0.85rem; font-weight: 600; padding: 0; }
+    .card { background: #fff; border: 1px solid #E0E0E0; border-radius: 10px; padding: 2rem; }
+    h2 { font-size: 1.25rem; margin-bottom: 1.5rem; color: #1A1A1A; }
+    .field { margin-bottom: 1.25rem; }
+    .field label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: #374151; }
+    .field .note { font-weight: 400; color: #6B7280; }
+    input[type=text], input[type=password], input[type=date], input[type=email] {
+      width: 100%; padding: 0.65rem 0.85rem;
+      border: 1px solid #D1D5DB; border-radius: 6px;
+      font-size: 0.95rem; font-family: inherit; color: #1A1A1A; background: #fff;
+      transition: border-color 0.15s;
+    }
+    input:focus { outline: none; border-color: #40916C; box-shadow: 0 0 0 3px rgba(64,145,108,0.12); }
+    .upload-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .upload-label { padding: 0.5rem 1rem; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
+    .upload-label:hover { background: #E5E7EB; }
+    #img-file { display: none; }
+    #upload-status { font-size: 0.82rem; color: #6B7280; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.6rem; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #2D6A4F; color: #fff; }
+    .btn-primary:hover { background: #1B4332; }
+    .btn-primary:disabled { background: #9CA3AF; cursor: not-allowed; }
+    .msg { margin-top: 1.25rem; padding: 0.9rem 1.1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; display: none; }
+    .msg-ok  { background: #D8F3DC; color: #1B4332; border: 1px solid #40916C; }
+    .msg-err { background: #FDECEA; color: #9B1C1C; border: 1px solid #C62828; }
+    /* EasyMDE overrides */
+    .EasyMDEContainer { border-radius: 6px; overflow: hidden; }
+    .CodeMirror { font-size: 0.95rem; }
+  </style>
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
+<div class="wrap">
+
+  <div class="top">
+    <img src="../images/ecfr-logo.png" alt="Eccleshall CFRs" class="logo">
+    <div class="user-bar" id="user-bar" style="display:none;">
+      <span id="user-label"></span>
+      <button class="logout" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div id="login-view" class="card">
+    <h2>Admin login</h2>
+    <form id="login-form">
+      <div class="field">
+        <label for="un">Username</label>
+        <input type="text" id="un" required autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="ak">Access key</label>
+        <input type="password" id="ak" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Log in</button>
+    </form>
+    <div class="msg" id="login-msg"></div>
+  </div>
+
+  <!-- Editor -->
+  <div id="editor-view" class="card" style="display:none;">
+    <h2>New update</h2>
+    <form id="post-form">
+      <div class="field">
+        <label for="title">Title *</label>
+        <input type="text" id="title" required placeholder="Steve's fundraising bikeathon — September 2026">
+      </div>
+      <div class="field">
+        <label for="date">Date *</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field">
+        <label for="summary">Summary <span class="note">(shown on the updates list — keep it short)</span></label>
+        <input type="text" id="summary" placeholder="One sentence description for the preview card">
+      </div>
+      <div class="field">
+        <label>Featured image <span class="note">(optional)</span></label>
+        <div class="upload-row">
+          <label class="upload-label" for="img-file">📎 Upload image</label>
+          <input type="file" id="img-file" accept="image/png,image/jpeg,image/gif,image/webp">
+          <span id="upload-status">No image chosen</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Body *</label>
+        <textarea id="body"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" id="pub-btn">Publish update</button>
+    </form>
+    <div class="msg" id="post-msg"></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script>
+var mde = null;
+var auth = {
+  username: sessionStorage.getItem('cfr_u'),
+  key:      sessionStorage.getItem('cfr_k')
+};
+
+function showMsg(id, type, text) {
+  var el = document.getElementById(id);
+  el.className = 'msg msg-' + type;
+  el.textContent = text;
+  el.style.display = '';
+}
+
+function hideMsg(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function initEditor() {
+  if (mde) return;
+  mde = new EasyMDE({
+    element: document.getElementById('body'),
+    spellChecker: false,
+    placeholder: 'Write the full update here…',
+    toolbar: ['bold', 'italic', 'heading-2', '|', 'unordered-list', 'ordered-list', '|', 'link', '|', 'preview', 'guide'],
+    minHeight: '220px',
+    status: false
+  });
+}
+
+function showEditor() {
+  document.getElementById('login-view').style.display = 'none';
+  document.getElementById('editor-view').style.display = '';
+  document.getElementById('user-bar').style.display = '';
+  document.getElementById('user-label').textContent = 'Logged in as ' + auth.username;
+  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  initEditor();
+}
+
+function showLogin() {
+  document.getElementById('login-view').style.display = '';
+  document.getElementById('editor-view').style.display = 'none';
+  document.getElementById('user-bar').style.display = 'none';
+}
+
+function logout() {
+  sessionStorage.removeItem('cfr_u');
+  sessionStorage.removeItem('cfr_k');
+  auth = { username: null, key: null };
+  showLogin();
+}
+
+// Restore session
+if (auth.username && auth.key) {
+  showEditor();
+} else {
+  showLogin();
+}
+
+// Login
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  hideMsg('login-msg');
+
+  var username = document.getElementById('un').value.trim();
+  var key = document.getElementById('ak').value;
+
+  try {
+    var res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, key })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      sessionStorage.setItem('cfr_u', username);
+      sessionStorage.setItem('cfr_k', key);
+      auth = { username, key };
+      showEditor();
+    } else {
+      showMsg('login-msg', 'err', 'Incorrect username or access key.');
+    }
+  } catch (err) {
+    showMsg('login-msg', 'err', 'Could not connect — please try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Log in';
+});
+
+// Image upload
+document.getElementById('img-file').addEventListener('change', async function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('upload-status');
+  statusEl.textContent = 'Uploading…';
+
+  var fd = new FormData();
+  fd.append('username', auth.username);
+  fd.append('key', auth.key);
+  fd.append('file', file);
+
+  try {
+    var res = await fetch('/api/upload', { method: 'POST', body: fd });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      // Insert image into editor at cursor
+      var imgMd = '![' + file.name.replace(/\.[^.]+$/, '') + '](' + data.url + ')';
+      mde.codemirror.replaceSelection(imgMd);
+      statusEl.textContent = '✓ ' + file.name + ' uploaded';
+    } else {
+      statusEl.textContent = '✗ Upload failed — ' + (data.error || 'try again');
+    }
+  } catch (err) {
+    statusEl.textContent = '✗ Upload failed.';
+  }
+});
+
+// Publish
+document.getElementById('post-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('pub-btn');
+  btn.disabled = true; btn.textContent = 'Publishing…';
+  hideMsg('post-msg');
+
+  var body = mde.value().trim();
+  if (!body) {
+    showMsg('post-msg', 'err', 'Please write some content.');
+    btn.disabled = false; btn.textContent = 'Publish update';
+    return;
+  }
+
+  try {
+    var res = await fetch('/api/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: auth.username,
+        key: auth.key,
+        title:   document.getElementById('title').value.trim(),
+        date:    document.getElementById('date').value,
+        summary: document.getElementById('summary').value.trim(),
+        content: body
+      })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      showMsg('post-msg', 'ok', '✓ Published! The update will appear on the site within a minute.');
+      document.getElementById('post-form').reset();
+      mde.value('');
+      document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('upload-status').textContent = 'No image chosen';
+    } else {
+      showMsg('post-msg', 'err', '✗ ' + (data.error || 'Could not publish — please try again.'));
+    }
+  } catch (err) {
+    showMsg('post-msg', 'err', '✗ Could not connect — please try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Publish update';
+});
+</script>
 </body>
 </html>
