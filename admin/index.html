@@ -186,7 +186,7 @@ function logout() {
   sessionStorage.removeItem('cfr_u');
   sessionStorage.removeItem('cfr_k');
   auth = { username: null, key: null };
-  showLogin();
+  window.location.href = '/';
 }
 
 // Media library
