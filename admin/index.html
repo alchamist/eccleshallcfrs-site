@@ -14,7 +14,9 @@
     .user-bar { font-size: 0.85rem; color: #6B7280; display: flex; align-items: center; gap: 0.75rem; }
     .logout { background: none; border: none; color: #C62828; cursor: pointer; font-size: 0.85rem; font-weight: 600; padding: 0; }
     .card { background: #fff; border: 1px solid #E0E0E0; border-radius: 10px; padding: 2rem; }
+    .card + .card { margin-top: 1.5rem; }
     h2 { font-size: 1.25rem; margin-bottom: 1.5rem; color: #1A1A1A; }
+    h3 { font-size: 1rem; color: #1A1A1A; }
     .field { margin-bottom: 1.25rem; }
     .field label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: #374151; }
     .field .note { font-weight: 400; color: #6B7280; }
@@ -34,12 +36,26 @@
     .btn-primary { background: #2D6A4F; color: #fff; }
     .btn-primary:hover { background: #1B4332; }
     .btn-primary:disabled { background: #9CA3AF; cursor: not-allowed; }
+    .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+    .btn-ghost { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
+    .btn-ghost:hover { background: #E5E7EB; }
     .msg { margin-top: 1.25rem; padding: 0.9rem 1.1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; display: none; }
     .msg-ok  { background: #D8F3DC; color: #1B4332; border: 1px solid #40916C; }
     .msg-err { background: #FDECEA; color: #9B1C1C; border: 1px solid #C62828; }
     /* EasyMDE overrides */
     .EasyMDEContainer { border-radius: 6px; overflow: hidden; }
     .CodeMirror { font-size: 0.95rem; }
+    /* Media library */
+    .media-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .media-hint { font-size: 0.82rem; color: #6B7280; margin-top: 0.35rem; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+    .media-item { position: relative; border: 2px solid #E0E0E0; border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; aspect-ratio: 4/3; background: #F3F4F6; }
+    .media-item:hover { border-color: #2D6A4F; }
+    .media-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-item-name { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.7rem; padding: 0.2rem 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .media-empty { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
+    .media-loading { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
+    .media-inserted { border-color: #40916C !important; }
   </style>
 </head>
 <body>
@@ -71,36 +87,50 @@
   </div>
 
   <!-- Editor -->
-  <div id="editor-view" class="card" style="display:none;">
-    <h2>New update</h2>
-    <form id="post-form">
-      <div class="field">
-        <label for="title">Title *</label>
-        <input type="text" id="title" required placeholder="Steve's fundraising bikeathon — September 2026">
-      </div>
-      <div class="field">
-        <label for="date">Date *</label>
-        <input type="date" id="date" required>
-      </div>
-      <div class="field">
-        <label for="summary">Summary <span class="note">(shown on the updates list — keep it short)</span></label>
-        <input type="text" id="summary" placeholder="One sentence description for the preview card">
-      </div>
-      <div class="field">
-        <label>Featured image <span class="note">(optional)</span></label>
-        <div class="upload-row">
-          <label class="upload-label" for="img-file">📎 Upload image</label>
-          <input type="file" id="img-file" accept="image/png,image/jpeg,image/gif,image/webp">
-          <span id="upload-status">No image chosen</span>
+  <div id="editor-view" style="display:none;">
+    <div class="card">
+      <h2>New update</h2>
+      <form id="post-form">
+        <div class="field">
+          <label for="title">Title *</label>
+          <input type="text" id="title" required placeholder="Steve's fundraising bikeathon — September 2026">
         </div>
+        <div class="field">
+          <label for="date">Date *</label>
+          <input type="date" id="date" required>
+        </div>
+        <div class="field">
+          <label for="summary">Summary <span class="note">(shown on the updates list — keep it short)</span></label>
+          <input type="text" id="summary" placeholder="One sentence description for the preview card">
+        </div>
+        <div class="field">
+          <label>Upload image <span class="note">(uploads to media library and inserts at cursor)</span></label>
+          <div class="upload-row">
+            <label class="upload-label" for="img-file">📎 Choose image</label>
+            <input type="file" id="img-file" accept="image/png,image/jpeg,image/gif,image/webp">
+            <span id="upload-status">No image chosen</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Body *</label>
+          <textarea id="body"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" id="pub-btn">Publish update</button>
+      </form>
+      <div class="msg" id="post-msg"></div>
+    </div>
+
+    <!-- Media library -->
+    <div class="card" id="media-card">
+      <div class="media-header">
+        <div>
+          <h3>Media library</h3>
+          <p class="media-hint">Click any image to insert it at the cursor position in the editor above.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadMedia()">↻ Refresh</button>
       </div>
-      <div class="field">
-        <label>Body *</label>
-        <textarea id="body"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" id="pub-btn">Publish update</button>
-    </form>
-    <div class="msg" id="post-msg"></div>
+      <div id="media-grid" class="media-grid"></div>
+    </div>
   </div>
 
 </div>
@@ -143,6 +173,7 @@ function showEditor() {
   document.getElementById('user-label').textContent = 'Logged in as ' + auth.username;
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
   initEditor();
+  loadMedia();
 }
 
 function showLogin() {
@@ -156,6 +187,40 @@ function logout() {
   sessionStorage.removeItem('cfr_k');
   auth = { username: null, key: null };
   showLogin();
+}
+
+// Media library
+async function loadMedia() {
+  var grid = document.getElementById('media-grid');
+  grid.innerHTML = '<p class="media-loading">Loading…</p>';
+  try {
+    var res = await fetch('/api/media', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.ok) { grid.innerHTML = '<p class="media-empty">Could not load media.</p>'; return; }
+    if (!data.files.length) { grid.innerHTML = '<p class="media-empty">No images uploaded yet. Use the upload button above to add images.</p>'; return; }
+    grid.innerHTML = '';
+    data.files.forEach(function(f) {
+      var item = document.createElement('div');
+      item.className = 'media-item';
+      item.title = f.name + '\nClick to insert';
+      item.innerHTML = '<img src="' + f.url + '" alt="' + f.name + '" loading="lazy"><span class="media-item-name">' + f.name + '</span>';
+      item.addEventListener('click', function() {
+        var altText = f.name.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '');
+        var md = '![' + altText + '](' + f.url + ')';
+        mde.codemirror.replaceSelection(md);
+        mde.codemirror.focus();
+        item.classList.add('media-inserted');
+        setTimeout(function() { item.classList.remove('media-inserted'); }, 1000);
+      });
+      grid.appendChild(item);
+    });
+  } catch (e) {
+    grid.innerHTML = '<p class="media-empty">Could not load media.</p>';
+  }
 }
 
 // Restore session
@@ -196,7 +261,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
   btn.disabled = false; btn.textContent = 'Log in';
 });
 
-// Image upload
+// Image upload — uploads then refreshes media library
 document.getElementById('img-file').addEventListener('change', async function(e) {
   var file = e.target.files[0];
   if (!file) return;
@@ -212,16 +277,18 @@ document.getElementById('img-file').addEventListener('change', async function(e)
     var res = await fetch('/api/upload', { method: 'POST', body: fd });
     var data = await res.json();
     if (res.ok && data.ok) {
-      // Insert image into editor at cursor
       var imgMd = '![' + file.name.replace(/\.[^.]+$/, '') + '](' + data.url + ')';
       mde.codemirror.replaceSelection(imgMd);
+      mde.codemirror.focus();
       statusEl.textContent = '✓ ' + file.name + ' uploaded';
+      loadMedia();
     } else {
       statusEl.textContent = '✗ Upload failed — ' + (data.error || 'try again');
     }
   } catch (err) {
     statusEl.textContent = '✗ Upload failed.';
   }
+  e.target.value = '';
 });
 
 // Publish
