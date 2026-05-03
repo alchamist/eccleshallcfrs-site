@@ -179,8 +179,8 @@ p  { color: var(--muted); }
   box-shadow: 0 0 0 3px rgba(64,145,108,0.12);
 }
 .contact-form textarea { resize: vertical; min-height: 140px; }
-.form-success { background: var(--green-pale); border: 1px solid var(--green-2); border-radius: var(--radius); padding: 1.25rem; color: var(--green); font-weight: 600; }
-.form-error   { background: #fdecea; border: 1px solid var(--red); border-radius: var(--radius); padding: 1.25rem; color: var(--red); font-weight: 600; }
+.form-success { background: var(--green-pale); border: 1px solid var(--green-2); border-radius: var(--radius); padding: 1.25rem; color: var(--green); font-weight: 600; margin-bottom: 1.5rem; }
+.form-error   { background: #fdecea; border: 1px solid var(--red); border-radius: var(--radius); padding: 1.25rem; color: var(--red); font-weight: 600; margin-bottom: 1.5rem; }
 
 /* ---- Info box (contact sidebar) ---- */
 .info-box { background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
