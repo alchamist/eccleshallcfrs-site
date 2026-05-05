@@ -187,8 +187,8 @@ p  { color: var(--muted); }
 .team-photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; object-position: top; display: block; }
 .team-info { padding: 0.85rem 0.75rem; }
 .team-info strong { display: block; font-size: 0.95rem; color: var(--text); }
-.team-role { display: inline-block; margin-top: 0.35rem; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.team-role-coord { color: var(--green); }
+.team-role { display: inline-block; margin-top: 0.35rem; font-size: 0.75rem; font-weight: 600; color: var(--muted); background: var(--bg-alt); border-radius: 20px; padding: 0.2rem 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.team-role-coord { background: var(--green); color: #fff; }
 
 /* ---- Info box (contact sidebar) ---- */
 .info-box { background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
