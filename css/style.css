@@ -181,6 +181,14 @@ p  { color: var(--muted); }
 .contact-form textarea { resize: vertical; min-height: 140px; }
 .form-success { background: var(--green-pale); border: 1px solid var(--green-2); border-radius: var(--radius); padding: 1.25rem; color: var(--green); font-weight: 600; margin-bottom: 1.5rem; }
 .form-error   { background: #fdecea; border: 1px solid var(--red); border-radius: var(--radius); padding: 1.25rem; color: var(--red); font-weight: 600; margin-bottom: 1.5rem; }
+/* Team grid */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem; margin-top: 0; }
+.team-card { background: #fff; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); text-align: center; }
+.team-photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; object-position: top; display: block; }
+.team-info { padding: 0.85rem 0.75rem; }
+.team-info strong { display: block; font-size: 0.95rem; color: var(--text); }
+.team-role { display: inline-block; margin-top: 0.35rem; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.team-role-coord { color: var(--green); }
 
 /* ---- Info box (contact sidebar) ---- */
 .info-box { background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
