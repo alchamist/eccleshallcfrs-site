@@ -30,7 +30,7 @@
     .upload-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
     .upload-label { padding: 0.5rem 1rem; background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
     .upload-label:hover { background: #E5E7EB; }
-    #img-file { display: none; }
+    #img-file, #featured-file { display: none; }
     #upload-status { font-size: 0.82rem; color: #6B7280; }
     .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.6rem; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
     .btn-primary { background: #2D6A4F; color: #fff; }
@@ -57,7 +57,7 @@
     .media-loading { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-inserted { border-color: #40916C !important; }
     /* Featured image */
-    .featured-row { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .featured-row { display: flex; gap: 0.75rem; align-items: center; }
     .featured-thumb { width: 108px; height: 80px; border: 2px dashed #D1D5DB; border-radius: 6px; background: #F9FAFB; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #9CA3AF; overflow: hidden; flex-shrink: 0; text-align: center; }
     .featured-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .featured-controls { flex: 1; min-width: 0; }
@@ -138,8 +138,8 @@
           <label for="summary">Summary <span class="note">(shown on the updates list — keep it short)</span></label>
           <input type="text" id="summary" placeholder="One sentence description for the preview card">
         </div>
-        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-          <div class="field" style="flex:1;min-width:160px;">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+          <div class="field" style="flex:1;min-width:160px;margin-bottom:0;">
             <label for="status">Status</label>
             <select id="status" style="width:100%;padding:0.65rem 0.85rem;border:1px solid #D1D5DB;border-radius:6px;font-size:0.95rem;font-family:inherit;color:#1A1A1A;background:#fff;">
               <option value="published">Published</option>
@@ -147,11 +147,12 @@
               <option value="archived">Archived</option>
             </select>
           </div>
-          <div class="field" style="flex:1;min-width:160px;">
-            <label for="end-date">Hide from <span class="note">(optional — leave blank to show indefinitely)</span></label>
+          <div class="field" style="flex:1;min-width:160px;margin-bottom:0;">
+            <label for="end-date">Hide from <span class="note">(optional)</span></label>
             <input type="date" id="end-date">
           </div>
         </div>
+        <div style="height:1.25rem;"></div>
         <div class="field">
           <label>Featured image <span class="note">(shown as the card thumbnail on the updates list)</span></label>
           <div class="featured-row">
@@ -159,8 +160,8 @@
             <div class="featured-controls">
               <input type="text" id="featured-url" placeholder="Paste a URL, or upload / choose from library below">
               <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center;">
-                <label class="upload-label" for="featured-file" style="font-size:0.82rem;">📎 Upload featured image</label>
-                <input type="file" id="featured-file" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('featured-file').click()">📎 Upload</button>
+                <input type="file" id="featured-file" accept="image/png,image/jpeg,image/gif,image/webp">
                 <button type="button" class="btn btn-ghost btn-sm" onclick="clearFeaturedImage()">✕ Clear</button>
                 <span id="featured-status" style="font-size:0.82rem;color:#6B7280;"></span>
               </div>

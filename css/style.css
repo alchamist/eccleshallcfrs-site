@@ -248,6 +248,39 @@ p  { color: var(--muted); }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8rem; }
 .charity-no { font-size: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 99px; padding: 0.25rem 0.75rem; }
 
+/* ---- On Duty badge ---- */
+.duty-pill {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35);
+  color: #fff; padding: 0.35rem 0.9rem; border-radius: 999px;
+  font-size: 0.85rem; font-weight: 600;
+}
+.duty-dot {
+  width: 7px; height: 7px; background: #6EE7A0; border-radius: 50%;
+  flex-shrink: 0;
+  animation: duty-pulse 2s ease-in-out infinite;
+}
+@keyframes duty-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(110,231,160,0.5); }
+  50%       { opacity: 0.75; box-shadow: 0 0 0 5px rgba(110,231,160,0); }
+}
+
+/* ---- Stats strip ---- */
+.stats-strip { background: #1B4332; color: #fff; padding: 1.75rem 0; }
+.stats-inner {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap;
+}
+.stat-item { text-align: center; padding: 0.5rem 3rem; }
+.stat-num  { display: block; font-size: 2.4rem; font-weight: 800; color: #fff; line-height: 1.1; }
+.stat-lbl  { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+             letter-spacing: 0.08em; color: rgba(255,255,255,0.65); margin-top: 0.25rem; }
+.stat-divider { width: 1px; height: 50px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
+@media (max-width: 480px) {
+  .stat-divider { display: none; }
+  .stat-item { padding: 0.5rem 1.75rem; }
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .nav-links {

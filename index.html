@@ -36,6 +36,9 @@
 
   <section class="hero">
     <div class="container">
+      <div id="duty-badge" style="display:none;margin-bottom:1.1rem;">
+        <span class="duty-pill"><span class="duty-dot"></span> On Duty</span>
+      </div>
       <h1>Saving Lives in Eccleshall</h1>
       <p>Trained volunteers responding to 999 calls across Eccleshall and the surrounding area — often first on scene before the ambulance arrives.</p>
       <div class="hero-ctas">
@@ -52,6 +55,22 @@
         <p style="margin-top:0.75rem;font-size:1.05rem;">Eccleshall Community First Responders are volunteers trained by West Midlands Ambulance Service to a nationally recognised standard. We respond to 999 calls and provide immediate medical aid until the ambulance arrives. We receive no central funding — we rely entirely on local donations and fundraising.</p>
         <p style="margin-top:0.5rem;">In June 2017 we were awarded the <strong>Queen's Award for Voluntary Service</strong> — the highest award for volunteer groups in the UK.</p>
         <a href="about.html" class="btn btn-outline" style="margin-top:1.25rem;">More about us</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-strip" id="stats-strip" style="display:none;">
+    <div class="container">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <span class="stat-num" id="stat-hours">—</span>
+          <span class="stat-lbl">hours this month</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-incidents">—</span>
+          <span class="stat-lbl">incidents this month</span>
+        </div>
       </div>
     </div>
   </section>
@@ -152,6 +171,31 @@
     });
   })();
   initUpdatesList('latest-news', 3);
+
+  // On Duty badge
+  (async function() {
+    try {
+      var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/active');
+      if (!r.ok) return;
+      var d = await r.json();
+      if (d.active) document.getElementById('duty-badge').style.display = '';
+    } catch(e) {}
+  })();
+
+  // Monthly stats
+  (async function() {
+    try {
+      var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/metrics?period=MONTH');
+      if (!r.ok) return;
+      var d = await r.json();
+      if (d.hours == null && d.incidents == null) return;
+      var h = d.hours != null ? (d.hours % 1 === 0 ? String(d.hours) : d.hours.toFixed(1)) : '—';
+      var i = d.incidents != null ? String(d.incidents) : '—';
+      document.getElementById('stat-hours').textContent = h;
+      document.getElementById('stat-incidents').textContent = i;
+      document.getElementById('stats-strip').style.display = '';
+    } catch(e) {}
+  })();
 </script>
 </body>
 </html>
