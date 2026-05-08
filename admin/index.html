@@ -56,6 +56,16 @@
     .media-empty { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-loading { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-inserted { border-color: #40916C !important; }
+    /* Published updates list */
+    .update-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #F3F4F6; gap: 1rem; }
+    .update-row:last-child { border-bottom: none; }
+    .update-info { min-width: 0; flex: 1; }
+    .update-date { font-size: 0.82rem; color: #6B7280; margin-right: 0.5rem; white-space: nowrap; }
+    .update-title-text { font-size: 0.9rem; }
+    .update-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .btn-danger { background: #FDECEA; color: #9B1C1C; border: 1px solid #C62828; }
+    .btn-danger:hover { background: #fca5a5; }
+    .list-status { color: #6B7280; font-size: 0.9rem; padding: 1rem 0; text-align: center; }
   </style>
 </head>
 <body>
@@ -88,8 +98,18 @@
 
   <!-- Editor -->
   <div id="editor-view" style="display:none;">
+
+    <!-- Published updates -->
     <div class="card">
-      <h2>New update</h2>
+      <div class="media-header">
+        <h2 style="margin-bottom:0">Published updates</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadUpdates()">↻ Refresh</button>
+      </div>
+      <div id="updates-list"><p class="list-status">Loading…</p></div>
+    </div>
+
+    <div class="card">
+      <h2 id="form-heading">New update</h2>
       <form id="post-form">
         <div class="field">
           <label for="title">Title *</label>
@@ -115,7 +135,10 @@
           <label>Body *</label>
           <textarea id="body"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary" id="pub-btn">Publish update</button>
+        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary" id="pub-btn">Publish update</button>
+          <button type="button" class="btn btn-ghost" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+        </div>
       </form>
       <div class="msg" id="post-msg"></div>
     </div>
@@ -142,6 +165,90 @@ var auth = {
   username: sessionStorage.getItem('cfr_u'),
   key:      sessionStorage.getItem('cfr_k')
 };
+var editPath = null;
+
+async function loadUpdates() {
+  var list = document.getElementById('updates-list');
+  list.innerHTML = '<p class="list-status">Loading…</p>';
+  try {
+    var res = await fetch('/api/updates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.ok) { list.innerHTML = '<p class="list-status">Could not load updates.</p>'; return; }
+    if (!data.updates.length) { list.innerHTML = '<p class="list-status">No updates published yet.</p>'; return; }
+    list.innerHTML = '';
+    data.updates.forEach(function(u) {
+      var row = document.createElement('div');
+      row.className = 'update-row';
+      row.innerHTML =
+        '<div class="update-info">' +
+          '<span class="update-date">' + (u.date || '') + '</span>' +
+          '<span class="update-title-text">' + escHtml(u.title) + '</span>' +
+        '</div>' +
+        '<div class="update-actions">' +
+          '<button class="btn btn-ghost btn-sm edit-btn">Edit</button>' +
+          '<button class="btn btn-danger btn-sm del-btn">Delete</button>' +
+        '</div>';
+      row.querySelector('.edit-btn').addEventListener('click', function() { startEdit(u); });
+      row.querySelector('.del-btn').addEventListener('click', function() { deleteUpdate(u.path, u.title); });
+      list.appendChild(row);
+    });
+  } catch (e) {
+    list.innerHTML = '<p class="list-status">Could not load updates.</p>';
+  }
+}
+
+function startEdit(u) {
+  editPath = u.path;
+  document.getElementById('form-heading').textContent = 'Edit update';
+  document.getElementById('pub-btn').textContent = 'Save changes';
+  document.getElementById('cancel-btn').style.display = '';
+  document.getElementById('title').value = u.title;
+  document.getElementById('date').value = u.date;
+  document.getElementById('summary').value = u.summary || '';
+  mde.value(u.content || '');
+  document.getElementById('post-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  hideMsg('post-msg');
+}
+
+function cancelEdit() {
+  editPath = null;
+  document.getElementById('form-heading').textContent = 'New update';
+  document.getElementById('pub-btn').textContent = 'Publish update';
+  document.getElementById('cancel-btn').style.display = 'none';
+  document.getElementById('post-form').reset();
+  mde.value('');
+  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('upload-status').textContent = 'No image chosen';
+  hideMsg('post-msg');
+}
+
+async function deleteUpdate(path, title) {
+  if (!confirm('Delete "' + title + '"?\n\nThis cannot be undone.')) return;
+  try {
+    var res = await fetch('/api/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, path })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      loadUpdates();
+      if (editPath === path) cancelEdit();
+    } else {
+      alert('Delete failed: ' + (data.error || 'please try again'));
+    }
+  } catch (e) {
+    alert('Delete failed — please try again.');
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 function showMsg(id, type, text) {
   var el = document.getElementById(id);
@@ -174,6 +281,7 @@ function showEditor() {
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
   initEditor();
   loadMedia();
+  loadUpdates();
 }
 
 function showLogin() {
@@ -315,16 +423,23 @@ document.getElementById('post-form').addEventListener('submit', async function(e
         title:   document.getElementById('title').value.trim(),
         date:    document.getElementById('date').value,
         summary: document.getElementById('summary').value.trim(),
-        content: body
+        content: body,
+        ...(editPath ? { editPath } : {})
       })
     });
     var data = await res.json();
     if (res.ok && data.ok) {
-      showMsg('post-msg', 'ok', '✓ Published! The update will appear on the site within a minute.');
+      var wasEdit = !!editPath;
+      showMsg('post-msg', 'ok', wasEdit ? '✓ Update saved! Changes will appear on the site within a minute.' : '✓ Published! The update will appear on the site within a minute.');
+      editPath = null;
+      document.getElementById('form-heading').textContent = 'New update';
+      document.getElementById('pub-btn').textContent = 'Publish update';
+      document.getElementById('cancel-btn').style.display = 'none';
       document.getElementById('post-form').reset();
       mde.value('');
       document.getElementById('date').value = new Date().toISOString().slice(0, 10);
       document.getElementById('upload-status').textContent = 'No image chosen';
+      loadUpdates();
     } else {
       showMsg('post-msg', 'err', '✗ ' + (data.error || 'Could not publish — please try again.'));
     }

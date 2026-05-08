@@ -1,6 +1,6 @@
 export async function onRequestPost({ request, env }) {
   try {
-    const { username, key, title, date, summary, content } = await request.json();
+    const { username, key, title, date, summary, content, editPath } = await request.json();
 
     if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
     if (!title || !date || !content) return json({ ok: false, error: 'title, date and content are required' }, 400);
@@ -18,7 +18,7 @@ export async function onRequestPost({ request, env }) {
     const markdown = frontmatter + '\n' + content;
     const encoded = btoa(unescape(encodeURIComponent(markdown)));
 
-    const path = `updates/${slug}.md`;
+    const path = editPath || `updates/${slug}.md`;
     const repo = env.GITHUB_REPO;
     const token = env.GITHUB_TOKEN;
 
@@ -33,7 +33,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const body = {
-      message: `Add update: ${title}`,
+      message: editPath ? `Update: ${title}` : `Add update: ${title}`,
       content: encoded,
       ...(sha ? { sha } : {})
     };
