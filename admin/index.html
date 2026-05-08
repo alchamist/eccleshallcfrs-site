@@ -199,6 +199,24 @@
       <div class="msg" id="post-msg"></div>
     </div>
 
+    <!-- Media library -->
+    <div class="card" id="media-card">
+      <div class="media-header">
+        <div>
+          <h3>Media library</h3>
+          <p class="media-hint" id="media-hint">Click any image to insert it at the cursor position in the editor above.</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <div class="mode-tabs">
+            <button type="button" class="mode-tab active" id="mode-insert" onclick="setMediaMode('insert')">Insert in body</button>
+            <button type="button" class="mode-tab" id="mode-featured" onclick="setMediaMode('featured')">Set as featured</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadMedia()">↻ Refresh</button>
+        </div>
+      </div>
+      <div id="media-grid" class="media-grid"></div>
+    </div>
+
     <!-- Widget settings -->
     <div class="card">
       <h2>Homepage widgets</h2>
@@ -223,24 +241,6 @@
         </label>
       </div>
       <div class="msg" id="widget-msg"></div>
-    </div>
-
-    <!-- Media library -->
-    <div class="card" id="media-card">
-      <div class="media-header">
-        <div>
-          <h3>Media library</h3>
-          <p class="media-hint" id="media-hint">Click any image to insert it at the cursor position in the editor above.</p>
-        </div>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-          <div class="mode-tabs">
-            <button type="button" class="mode-tab active" id="mode-insert" onclick="setMediaMode('insert')">Insert in body</button>
-            <button type="button" class="mode-tab" id="mode-featured" onclick="setMediaMode('featured')">Set as featured</button>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="loadMedia()">↻ Refresh</button>
-        </div>
-      </div>
-      <div id="media-grid" class="media-grid"></div>
     </div>
   </div>
 
