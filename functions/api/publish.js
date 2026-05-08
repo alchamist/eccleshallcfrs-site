@@ -1,6 +1,6 @@
 export async function onRequestPost({ request, env }) {
   try {
-    const { username, key, title, date, summary, content, editPath, status, endDate } = await request.json();
+    const { username, key, title, date, summary, content, editPath, status, endDate, image } = await request.json();
 
     if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
     if (!title || !date || !content) return json({ ok: false, error: 'title, date and content are required' }, 400);
@@ -11,6 +11,7 @@ export async function onRequestPost({ request, env }) {
       `title: "${title.replace(/"/g, '\\"')}"`,
       `date: "${date}"`,
       summary ? `summary: "${summary.replace(/"/g, '\\"')}"` : '',
+      image   ? `image: "${image.replace(/"/g, '\\"')}"` : '',
       `status: "${status || 'published'}"`,
       endDate ? `end_date: "${endDate}"` : '',
       '---',

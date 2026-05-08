@@ -56,6 +56,16 @@
     .media-empty { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-loading { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-inserted { border-color: #40916C !important; }
+    /* Featured image */
+    .featured-row { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .featured-thumb { width: 108px; height: 80px; border: 2px dashed #D1D5DB; border-radius: 6px; background: #F9FAFB; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #9CA3AF; overflow: hidden; flex-shrink: 0; text-align: center; }
+    .featured-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .featured-controls { flex: 1; min-width: 0; }
+    /* Media library mode tabs */
+    .mode-tabs { display: flex; gap: 0.3rem; }
+    .mode-tab { padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; border: 1px solid #D1D5DB; cursor: pointer; background: #F3F4F6; color: #374151; }
+    .mode-tab.active { background: #2D6A4F; color: #fff; border-color: #2D6A4F; }
+    .media-item-set { border-color: #7C3AED !important; }
     /* Status badges */
     .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
     .badge-published { background: #D8F3DC; color: #1B4332; }
@@ -143,7 +153,22 @@
           </div>
         </div>
         <div class="field">
-          <label>Upload image <span class="note">(uploads to media library and inserts at cursor)</span></label>
+          <label>Featured image <span class="note">(shown as the card thumbnail on the updates list)</span></label>
+          <div class="featured-row">
+            <div id="featured-thumb" class="featured-thumb">No image<br>set</div>
+            <div class="featured-controls">
+              <input type="text" id="featured-url" placeholder="Paste a URL, or upload / choose from library below">
+              <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center;">
+                <label class="upload-label" for="featured-file" style="font-size:0.82rem;">📎 Upload featured image</label>
+                <input type="file" id="featured-file" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="clearFeaturedImage()">✕ Clear</button>
+                <span id="featured-status" style="font-size:0.82rem;color:#6B7280;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Add image to body <span class="note">(uploads and inserts at the cursor in the editor)</span></label>
           <div class="upload-row">
             <label class="upload-label" for="img-file">📎 Choose image</label>
             <input type="file" id="img-file" accept="image/png,image/jpeg,image/gif,image/webp">
@@ -167,9 +192,15 @@
       <div class="media-header">
         <div>
           <h3>Media library</h3>
-          <p class="media-hint">Click any image to insert it at the cursor position in the editor above.</p>
+          <p class="media-hint" id="media-hint">Click any image to insert it at the cursor position in the editor above.</p>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="loadMedia()">↻ Refresh</button>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <div class="mode-tabs">
+            <button type="button" class="mode-tab active" id="mode-insert" onclick="setMediaMode('insert')">Insert in body</button>
+            <button type="button" class="mode-tab" id="mode-featured" onclick="setMediaMode('featured')">Set as featured</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadMedia()">↻ Refresh</button>
+        </div>
       </div>
       <div id="media-grid" class="media-grid"></div>
     </div>
@@ -185,6 +216,36 @@ var auth = {
   key:      sessionStorage.getItem('cfr_k')
 };
 var editPath = null;
+var mediaMode = 'insert';
+
+function setMediaMode(mode) {
+  mediaMode = mode;
+  document.getElementById('mode-insert').classList.toggle('active', mode === 'insert');
+  document.getElementById('mode-featured').classList.toggle('active', mode === 'featured');
+  document.getElementById('media-hint').textContent = mode === 'featured'
+    ? 'Click any image to use it as the featured card image.'
+    : 'Click any image to insert it at the cursor position in the editor above.';
+}
+
+function updateFeaturedPreview(url) {
+  var thumb = document.getElementById('featured-thumb');
+  thumb.innerHTML = url ? '<img src="' + url + '" alt="featured">' : 'No image<br>set';
+}
+
+function setFeaturedImage(url) {
+  document.getElementById('featured-url').value = url;
+  updateFeaturedPreview(url);
+  setMediaMode('insert');
+  var s = document.getElementById('featured-status');
+  s.textContent = '✓ Set';
+  setTimeout(function() { s.textContent = ''; }, 2000);
+}
+
+function clearFeaturedImage() {
+  document.getElementById('featured-url').value = '';
+  updateFeaturedPreview('');
+  document.getElementById('featured-status').textContent = '';
+}
 
 async function loadUpdates() {
   var list = document.getElementById('updates-list');
@@ -233,6 +294,8 @@ function startEdit(u) {
   document.getElementById('summary').value = u.summary || '';
   document.getElementById('status').value = u.status || 'published';
   document.getElementById('end-date').value = u.endDate || '';
+  document.getElementById('featured-url').value = u.image || '';
+  updateFeaturedPreview(u.image || '');
   mde.value(u.content || '');
   document.getElementById('post-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   hideMsg('post-msg');
@@ -248,6 +311,7 @@ function cancelEdit() {
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
   document.getElementById('status').value = 'published';
   document.getElementById('end-date').value = '';
+  clearFeaturedImage();
   document.getElementById('upload-status').textContent = 'No image chosen';
   hideMsg('post-msg');
 }
@@ -343,12 +407,18 @@ async function loadMedia() {
       item.title = f.name + '\nClick to insert';
       item.innerHTML = '<img src="' + f.url + '" alt="' + f.name + '" loading="lazy"><span class="media-item-name">' + f.name + '</span>';
       item.addEventListener('click', function() {
-        var altText = f.name.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '');
-        var md = '![' + altText + '](' + f.url + ')';
-        mde.codemirror.replaceSelection(md);
-        mde.codemirror.focus();
-        item.classList.add('media-inserted');
-        setTimeout(function() { item.classList.remove('media-inserted'); }, 1000);
+        if (mediaMode === 'featured') {
+          setFeaturedImage(f.url);
+          item.classList.add('media-item-set');
+          setTimeout(function() { item.classList.remove('media-item-set'); }, 1000);
+        } else {
+          var altText = f.name.replace(/[-_]/g, ' ').replace(/\.[^.]+$/, '');
+          var md = '![' + altText + '](' + f.url + ')';
+          mde.codemirror.replaceSelection(md);
+          mde.codemirror.focus();
+          item.classList.add('media-inserted');
+          setTimeout(function() { item.classList.remove('media-inserted'); }, 1000);
+        }
       });
       grid.appendChild(item);
     });
@@ -425,6 +495,36 @@ document.getElementById('img-file').addEventListener('change', async function(e)
   e.target.value = '';
 });
 
+// Featured image URL typed manually
+document.getElementById('featured-url').addEventListener('input', function() {
+  updateFeaturedPreview(this.value.trim());
+});
+
+// Featured image upload
+document.getElementById('featured-file').addEventListener('change', async function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('featured-status');
+  statusEl.textContent = 'Uploading…';
+  var fd = new FormData();
+  fd.append('username', auth.username);
+  fd.append('key', auth.key);
+  fd.append('file', file);
+  try {
+    var res = await fetch('/api/upload', { method: 'POST', body: fd });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      setFeaturedImage(data.url);
+      loadMedia();
+    } else {
+      statusEl.textContent = '✗ Upload failed — ' + (data.error || 'try again');
+    }
+  } catch (err) {
+    statusEl.textContent = '✗ Upload failed.';
+  }
+  e.target.value = '';
+});
+
 // Publish
 document.getElementById('post-form').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -451,6 +551,7 @@ document.getElementById('post-form').addEventListener('submit', async function(e
         summary: document.getElementById('summary').value.trim(),
         status:  document.getElementById('status').value,
         endDate: document.getElementById('end-date').value || '',
+        image:   document.getElementById('featured-url').value.trim(),
         content: body,
         ...(editPath ? { editPath } : {})
       })
@@ -468,6 +569,7 @@ document.getElementById('post-form').addEventListener('submit', async function(e
       document.getElementById('date').value = new Date().toISOString().slice(0, 10);
       document.getElementById('status').value = 'published';
       document.getElementById('end-date').value = '';
+      clearFeaturedImage();
       document.getElementById('upload-status').textContent = 'No image chosen';
       loadUpdates();
     } else {

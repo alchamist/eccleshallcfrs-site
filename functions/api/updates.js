@@ -28,6 +28,7 @@ export async function onRequestPost({ request, env }) {
         title: meta.title || f.name,
         date: meta.date || '',
         summary: meta.summary || '',
+        image: meta.image || '',
         status: meta.status || 'published',
         endDate: meta.end_date || '',
         content
