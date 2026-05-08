@@ -172,28 +172,35 @@
   })();
   initUpdatesList('latest-news', 3);
 
-  // On Duty badge
   (async function() {
     try {
-      var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/active');
-      if (!r.ok) return;
-      var d = await r.json();
-      if (d.active) document.getElementById('duty-badge').style.display = '';
-    } catch(e) {}
-  })();
+      var cfg = await fetch('/api/config').then(function(r) { return r.ok ? r.json() : {}; });
 
-  // Monthly stats
-  (async function() {
-    try {
-      var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/metrics?period=MONTH');
-      if (!r.ok) return;
-      var d = await r.json();
-      if (d.hours == null && d.incidents == null) return;
-      var h = d.hours != null ? (d.hours % 1 === 0 ? String(d.hours) : d.hours.toFixed(1)) : '—';
-      var i = d.incidents != null ? String(d.incidents) : '—';
-      document.getElementById('stat-hours').textContent = h;
-      document.getElementById('stat-incidents').textContent = i;
-      document.getElementById('stats-strip').style.display = '';
+      if (cfg.showDuty) {
+        try {
+          var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/active');
+          if (r.ok) {
+            var d = await r.json();
+            if (d.active) document.getElementById('duty-badge').style.display = '';
+          }
+        } catch(e) {}
+      }
+
+      if (cfg.showStats) {
+        try {
+          var r = await fetch('https://eccleshallcfrs-app.pages.dev/api/status/metrics?period=MONTH');
+          if (r.ok) {
+            var d = await r.json();
+            if (d.hours != null || d.incidents != null) {
+              document.getElementById('stat-hours').textContent =
+                d.hours != null ? (d.hours % 1 === 0 ? String(d.hours) : d.hours.toFixed(1)) : '—';
+              document.getElementById('stat-incidents').textContent =
+                d.incidents != null ? String(d.incidents) : '—';
+              document.getElementById('stats-strip').style.display = '';
+            }
+          }
+        } catch(e) {}
+      }
     } catch(e) {}
   })();
 </script>

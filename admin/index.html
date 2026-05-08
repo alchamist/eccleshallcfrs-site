@@ -66,6 +66,17 @@
     .mode-tab { padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; border: 1px solid #D1D5DB; cursor: pointer; background: #F3F4F6; color: #374151; }
     .mode-tab.active { background: #2D6A4F; color: #fff; border-color: #2D6A4F; }
     .media-item-set { border-color: #7C3AED !important; }
+    /* Toggle switch */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #F3F4F6; }
+    .toggle-row:last-of-type { border-bottom: none; }
+    .toggle-label strong { display: block; font-size: 0.9rem; font-weight: 600; color: #1A1A1A; }
+    .toggle-label p { font-size: 0.82rem; color: #6B7280; margin-top: 0.15rem; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-slider { position: absolute; inset: 0; background: #D1D5DB; border-radius: 999px; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle-switch input:checked + .toggle-slider { background: #2D6A4F; }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
     /* Status badges */
     .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
     .badge-published { background: #D8F3DC; color: #1B4332; }
@@ -186,6 +197,32 @@
         </div>
       </form>
       <div class="msg" id="post-msg"></div>
+    </div>
+
+    <!-- Widget settings -->
+    <div class="card">
+      <h2>Homepage widgets</h2>
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <strong>On Duty badge</strong>
+          <p>Pulsing green badge in the hero when a responder is active</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-duty" onchange="saveWidgetConfig()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-label">
+          <strong>Hours &amp; incidents strip</strong>
+          <p>Monthly stats shown between 'Who We Are' and the Facebook section</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-stats" onchange="saveWidgetConfig()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="msg" id="widget-msg"></div>
     </div>
 
     <!-- Media library -->
@@ -337,6 +374,39 @@ async function deleteUpdate(path, title) {
   }
 }
 
+async function loadWidgetConfig() {
+  try {
+    var res = await fetch('/api/config');
+    var data = await res.json();
+    document.getElementById('toggle-duty').checked  = !!data.showDuty;
+    document.getElementById('toggle-stats').checked = !!data.showStats;
+  } catch(e) {}
+}
+
+async function saveWidgetConfig() {
+  try {
+    var res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: auth.username,
+        key: auth.key,
+        showDuty:  document.getElementById('toggle-duty').checked,
+        showStats: document.getElementById('toggle-stats').checked
+      })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      showMsg('widget-msg', 'ok', '✓ Saved');
+      setTimeout(function() { hideMsg('widget-msg'); }, 2000);
+    } else {
+      showMsg('widget-msg', 'err', '✗ Could not save — ' + (data.error || 'try again'));
+    }
+  } catch(e) {
+    showMsg('widget-msg', 'err', '✗ Could not connect.');
+  }
+}
+
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -373,6 +443,7 @@ function showEditor() {
   initEditor();
   loadMedia();
   loadUpdates();
+  loadWidgetConfig();
 }
 
 function showLogin() {
