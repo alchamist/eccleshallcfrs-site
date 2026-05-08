@@ -9,16 +9,12 @@ function apiUrl(path) {
 }
 
 async function fetchFileList() {
-  var cached = sessionStorage.getItem('cfr-update-list');
-  if (cached) return JSON.parse(cached);
   var res = await fetch(apiUrl(FOLDER), { headers: { Accept: 'application/vnd.github.v3+json' } });
   if (!res.ok) throw new Error('GitHub API ' + res.status);
   var files = await res.json();
-  var md = files
+  return files
     .filter(function(f) { return f.name.endsWith('.md'); })
     .sort(function(a, b) { return b.name.localeCompare(a.name); });
-  sessionStorage.setItem('cfr-update-list', JSON.stringify(md));
-  return md;
 }
 
 async function fetchFile(path) {
@@ -69,6 +65,16 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
+function isVisible(meta) {
+  var status = meta.status || 'published';
+  if (status !== 'published') return false;
+  if (meta.end_date) {
+    var today = new Date().toISOString().slice(0, 10);
+    if (today >= meta.end_date) return false;
+  }
+  return true;
+}
+
 function buildCard(update) {
   var imgHtml = update.image
     ? '<img class="news-card-img" src="' + esc(update.image) + '" alt="" loading="lazy">'
@@ -99,6 +105,7 @@ async function initUpdatesList(containerId, limit) {
       try {
         var raw = await fetchFile(f.path);
         var parsed = parseFrontmatter(raw);
+        if (!isVisible(parsed.meta)) return null;
         return {
           filename: f.name,
           title: parsed.meta.title || f.name.replace(/\.md$/, ''),
@@ -139,6 +146,10 @@ async function initSingleUpdate(containerId) {
     var raw = await fetchFile(FOLDER + '/' + filename);
     var parsed = parseFrontmatter(raw);
     var meta = parsed.meta;
+    if (!isVisible(meta)) {
+      el.innerHTML = '<div class="empty-state"><p>This update is no longer available. <a href="updates.html">Back to updates</a></p></div>';
+      return;
+    }
     document.title = (meta.title || 'Update') + ' – Eccleshall CFRs';
     var imgHtml = meta.image ? '<img src="' + esc(meta.image) + '" alt="" style="border-radius:var(--radius);margin-bottom:1.5rem;width:100%;" loading="lazy">' : '';
     el.innerHTML = '<article class="prose">'

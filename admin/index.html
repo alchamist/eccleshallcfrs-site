@@ -56,6 +56,11 @@
     .media-empty { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-loading { color: #6B7280; font-size: 0.9rem; padding: 1.5rem 0; text-align: center; }
     .media-inserted { border-color: #40916C !important; }
+    /* Status badges */
+    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-published { background: #D8F3DC; color: #1B4332; }
+    .badge-draft     { background: #FEF3C7; color: #92400E; }
+    .badge-archived  { background: #F3F4F6; color: #6B7280; }
     /* Published updates list */
     .update-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #F3F4F6; gap: 1rem; }
     .update-row:last-child { border-bottom: none; }
@@ -123,6 +128,20 @@
           <label for="summary">Summary <span class="note">(shown on the updates list — keep it short)</span></label>
           <input type="text" id="summary" placeholder="One sentence description for the preview card">
         </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <div class="field" style="flex:1;min-width:160px;">
+            <label for="status">Status</label>
+            <select id="status" style="width:100%;padding:0.65rem 0.85rem;border:1px solid #D1D5DB;border-radius:6px;font-size:0.95rem;font-family:inherit;color:#1A1A1A;background:#fff;">
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="field" style="flex:1;min-width:160px;">
+            <label for="end-date">Hide from <span class="note">(optional — leave blank to show indefinitely)</span></label>
+            <input type="date" id="end-date">
+          </div>
+        </div>
         <div class="field">
           <label>Upload image <span class="note">(uploads to media library and inserts at cursor)</span></label>
           <div class="upload-row">
@@ -183,12 +202,15 @@ async function loadUpdates() {
     data.updates.forEach(function(u) {
       var row = document.createElement('div');
       row.className = 'update-row';
+      var st = u.status || 'published';
       row.innerHTML =
         '<div class="update-info">' +
           '<span class="update-date">' + (u.date || '') + '</span>' +
           '<span class="update-title-text">' + escHtml(u.title) + '</span>' +
+          (u.endDate ? '<span class="update-date" style="margin-left:0.5rem;">expires ' + u.endDate + '</span>' : '') +
         '</div>' +
         '<div class="update-actions">' +
+          '<span class="badge badge-' + st + '">' + st + '</span>' +
           '<button class="btn btn-ghost btn-sm edit-btn">Edit</button>' +
           '<button class="btn btn-danger btn-sm del-btn">Delete</button>' +
         '</div>';
@@ -209,6 +231,8 @@ function startEdit(u) {
   document.getElementById('title').value = u.title;
   document.getElementById('date').value = u.date;
   document.getElementById('summary').value = u.summary || '';
+  document.getElementById('status').value = u.status || 'published';
+  document.getElementById('end-date').value = u.endDate || '';
   mde.value(u.content || '');
   document.getElementById('post-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   hideMsg('post-msg');
@@ -222,6 +246,8 @@ function cancelEdit() {
   document.getElementById('post-form').reset();
   mde.value('');
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('status').value = 'published';
+  document.getElementById('end-date').value = '';
   document.getElementById('upload-status').textContent = 'No image chosen';
   hideMsg('post-msg');
 }
@@ -403,7 +429,7 @@ document.getElementById('img-file').addEventListener('change', async function(e)
 document.getElementById('post-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   var btn = document.getElementById('pub-btn');
-  btn.disabled = true; btn.textContent = 'Publishing…';
+  btn.disabled = true; btn.textContent = editPath ? 'Saving…' : 'Publishing…';
   hideMsg('post-msg');
 
   var body = mde.value().trim();
@@ -423,6 +449,8 @@ document.getElementById('post-form').addEventListener('submit', async function(e
         title:   document.getElementById('title').value.trim(),
         date:    document.getElementById('date').value,
         summary: document.getElementById('summary').value.trim(),
+        status:  document.getElementById('status').value,
+        endDate: document.getElementById('end-date').value || '',
         content: body,
         ...(editPath ? { editPath } : {})
       })
@@ -438,6 +466,8 @@ document.getElementById('post-form').addEventListener('submit', async function(e
       document.getElementById('post-form').reset();
       mde.value('');
       document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('status').value = 'published';
+      document.getElementById('end-date').value = '';
       document.getElementById('upload-status').textContent = 'No image chosen';
       loadUpdates();
     } else {

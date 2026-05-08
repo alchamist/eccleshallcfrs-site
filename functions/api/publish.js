@@ -1,6 +1,6 @@
 export async function onRequestPost({ request, env }) {
   try {
-    const { username, key, title, date, summary, content, editPath } = await request.json();
+    const { username, key, title, date, summary, content, editPath, status, endDate } = await request.json();
 
     if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
     if (!title || !date || !content) return json({ ok: false, error: 'title, date and content are required' }, 400);
@@ -11,9 +11,11 @@ export async function onRequestPost({ request, env }) {
       `title: "${title.replace(/"/g, '\\"')}"`,
       `date: "${date}"`,
       summary ? `summary: "${summary.replace(/"/g, '\\"')}"` : '',
+      `status: "${status || 'published'}"`,
+      endDate ? `end_date: "${endDate}"` : '',
       '---',
       ''
-    ].filter(l => l !== undefined && !(l === '' && false)).join('\n');
+    ].filter(Boolean).join('\n');
 
     const markdown = frontmatter + '\n' + content;
     const encoded = btoa(unescape(encodeURIComponent(markdown)));

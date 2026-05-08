@@ -28,6 +28,8 @@ export async function onRequestPost({ request, env }) {
         title: meta.title || f.name,
         date: meta.date || '',
         summary: meta.summary || '',
+        status: meta.status || 'published',
+        endDate: meta.end_date || '',
         content
       };
     }));
