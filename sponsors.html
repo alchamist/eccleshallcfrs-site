@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Update – Eccleshall Community First Responders</title>
+  <title>Our Supporters – Eccleshall Community First Responders</title>
+  <meta name="description" content="The businesses and organisations whose generous support helps keep Eccleshall Community First Responders operational.">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
@@ -24,7 +25,7 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="volunteer.html">Volunteer</a></li>
-      <li><a href="updates.html" class="active">Updates</a></li>
+      <li><a href="updates.html">Updates</a></li>
       <li><a href="contact.html">Contact</a></li>
       <li><a href="donate.html" class="btn btn-red">Donate</a></li>
     </ul>
@@ -32,13 +33,45 @@
 </header>
 
 <main>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Our Supporters</h1>
+      <p>We are grateful to everyone whose generosity helps keep Eccleshall CFRs on the road and responding.</p>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
-      <div id="update-content">
-        <div class="loading-state"><div class="spinner"></div><p>Loading…</p></div>
+      <p style="max-width:640px;margin-bottom:2.5rem;">Eccleshall CFRs receives no central funding — we rely entirely on donations, fundraising, and the generosity of local businesses and grant-making organisations. The supporters listed here have made a direct and lasting difference to what we can do for the community.</p>
+
+      <div class="sponsor-grid">
+
+        <!-- National Lottery Community Fund -->
+        <div class="sponsor-card" style="background:#00529F;border-color:#00529F;">
+          <!-- Replace with official logo URL if available -->
+          <span class="sponsor-card-name" style="color:#fff;font-size:1rem;">The National Lottery<br>Community Fund</span>
+          <p class="sponsor-card-desc" style="color:rgba(255,255,255,0.75);">Funded the majority of our response vehicle</p>
+        </div>
+
+        <!-- Gentili -->
+        <div class="sponsor-card sponsor-card-dark">
+          <img src="https://gentili.uk.com/wp-content/uploads/2025/03/Gentili-white-o.png" alt="Gentili" style="margin-bottom:0.75rem;">
+          <p class="sponsor-card-desc">Proud supporter of Eccleshall CFRs</p>
+        </div>
+
       </div>
     </div>
   </section>
+
+  <section class="section section-alt">
+    <div class="container" style="max-width:640px;text-align:center;">
+      <h2>Become a Supporter</h2>
+      <p style="margin-top:0.75rem;">Your business or organisation could join this page. Sponsoring Eccleshall CFRs is a meaningful way to support your local community — and we'll make sure people know about your generosity.</p>
+      <a href="donate.html#sponsorship" class="btn btn-primary" style="margin-top:1.5rem;">See sponsorship opportunities →</a>
+    </div>
+  </section>
+
 </main>
 
 <footer class="site-footer">
@@ -77,8 +110,6 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
-<script src="js/updates.js"></script>
 <script>
   (function() {
     var t = document.querySelector('.nav-toggle');
@@ -88,7 +119,6 @@
       t.setAttribute('aria-expanded', String(open));
     });
   })();
-  initSingleUpdate('update-content');
 </script>
 </body>
 </html>

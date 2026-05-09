@@ -248,6 +248,33 @@ p  { color: var(--muted); }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8rem; }
 .charity-no { font-size: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 99px; padding: 0.25rem 0.75rem; }
 
+/* ---- Sponsor cards ---- */
+.sponsor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+.sponsor-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; min-height: 140px; background: #fff;
+}
+.sponsor-card-dark { background: #1B4332; border-color: #1B4332; }
+.sponsor-card img { max-width: 160px; max-height: 72px; object-fit: contain; display: block; }
+.sponsor-card-name { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+.sponsor-card-dark .sponsor-card-name { color: #fff; }
+.sponsor-card-desc { font-size: 0.82rem; color: var(--muted); margin-top: 0.4rem; }
+.sponsor-card-dark .sponsor-card-desc { color: rgba(255,255,255,0.7); }
+
+/* Sponsorship tier list */
+.tier-list { display: flex; flex-direction: column; gap: 0; }
+.tier-item {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border);
+}
+.tier-item:last-child { border-bottom: none; }
+.tier-info { flex: 1; min-width: 0; }
+.tier-info strong { display: block; font-size: 0.95rem; color: var(--text); }
+.tier-info p { font-size: 0.85rem; margin-top: 0.15rem; }
+.tier-cost { font-size: 1.1rem; font-weight: 800; color: var(--green); white-space: nowrap; flex-shrink: 0; }
+
 /* ---- On Duty badge ---- */
 .duty-pill {
   display: inline-flex; align-items: center; gap: 0.45rem;
