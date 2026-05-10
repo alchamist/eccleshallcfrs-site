@@ -3,21 +3,14 @@ export async function onRequestPost({ request, env }) {
     const { username, key } = await request.json();
     if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
 
-    const repo = env.GITHUB_REPO;
-    const token = env.GITHUB_TOKEN;
-
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/images/uploads`, {
-      headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'eccleshall-cfrs' }
-    });
-
-    if (res.status === 404) return json({ ok: true, files: [] });
-    if (!res.ok) return json({ ok: false, error: 'GitHub error' }, 502);
-
-    const files = await res.json();
-    const images = files
-      .filter(f => /\.(png|jpe?g|gif|webp)$/i.test(f.name))
-      .map(f => ({ name: f.name, url: f.download_url }))
-      .reverse();
+    const listed = await env.MEDIA_BUCKET.list();
+    const images = listed.objects
+      .filter(obj => /\.(png|jpe?g|gif|webp)$/i.test(obj.key))
+      .sort((a, b) => new Date(b.uploaded) - new Date(a.uploaded))
+      .map(obj => ({
+        name: obj.key,
+        url: `https://media.eccleshallcfrs.org.uk/${obj.key}`
+      }));
 
     return json({ ok: true, files: images });
   } catch (e) {
