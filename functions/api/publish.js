@@ -67,10 +67,11 @@ async function getRole(env, username, key) {
   if (!stored) return null;
   try {
     const data = JSON.parse(stored);
-    return data.key === key ? (data.role || 'editor') : null;
-  } catch {
-    return stored === key ? 'admin' : null;
-  }
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return data.key === key ? (data.role || 'editor') : null;
+    }
+  } catch { /* not JSON object — fall through */ }
+  return stored === key ? 'admin' : null;
 }
 
 function slugify(text) {
