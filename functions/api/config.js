@@ -10,7 +10,9 @@ export async function onRequestGet({ env }) {
 export async function onRequestPost({ request, env }) {
   try {
     const { username, key, showDuty, showStats } = await request.json();
-    if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
+    const role = await getRole(env, username, key);
+    if (!role) return json({ ok: false, error: 'Unauthorised' }, 401);
+    if (role !== 'admin') return json({ ok: false, error: 'Admin access required' }, 403);
 
     if (showDuty  !== undefined) await env.CFR_ADMINS.put('cfg:show_duty',  showDuty  ? 'true' : 'false');
     if (showStats !== undefined) await env.CFR_ADMINS.put('cfg:show_stats', showStats ? 'true' : 'false');
@@ -21,10 +23,16 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-async function checkAuth(env, username, key) {
-  if (!username || !key) return false;
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-  return stored === key;
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    return data.key === key ? (data.role || 'editor') : null;
+  } catch {
+    return stored === key ? 'admin' : null;
+  }
 }
 
 function json(body, status = 200) {

@@ -2,7 +2,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const { username, key, title, date, summary, content, editPath, status, endDate, image } = await request.json();
 
-    if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
+    if (!await getRole(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
     if (!title || !date || !content) return json({ ok: false, error: 'title, date and content are required' }, 400);
 
     const slug = slugify(title) + '-' + date;
@@ -25,7 +25,6 @@ export async function onRequestPost({ request, env }) {
     const repo = env.GITHUB_REPO;
     const token = env.GITHUB_TOKEN;
 
-    // Check if file exists to get its SHA (required for updates)
     let sha;
     const check = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'eccleshall-cfrs' }
@@ -62,10 +61,16 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-async function checkAuth(env, username, key) {
-  if (!username || !key) return false;
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-  return stored === key;
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    return data.key === key ? (data.role || 'editor') : null;
+  } catch {
+    return stored === key ? 'admin' : null;
+  }
 }
 
 function slugify(text) {

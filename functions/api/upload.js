@@ -5,7 +5,7 @@ export async function onRequestPost({ request, env }) {
     const key = form.get('key');
     const file = form.get('file');
 
-    if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
+    if (!await getRole(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
     if (!file || typeof file === 'string') return json({ ok: false, error: 'No file provided' }, 400);
 
     const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
@@ -24,10 +24,16 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-async function checkAuth(env, username, key) {
-  if (!username || !key) return false;
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-  return stored === key;
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    return data.key === key ? (data.role || 'editor') : null;
+  } catch {
+    return stored === key ? 'admin' : null;
+  }
 }
 
 function json(body, status = 200) {

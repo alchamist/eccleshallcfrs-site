@@ -3,12 +3,24 @@ export async function onRequestPost({ request, env }) {
     const { username, key } = await request.json();
     if (!username || !key) return json({ ok: false, error: 'Missing credentials' }, 400);
 
-    const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-    if (!stored || stored !== key) return json({ ok: false }, 401);
+    const role = await getRole(env, username, key);
+    if (!role) return json({ ok: false }, 401);
 
-    return json({ ok: true });
+    return json({ ok: true, role });
   } catch {
     return json({ ok: false, error: 'Bad request' }, 400);
+  }
+}
+
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
+  const stored = await env.CFR_ADMINS.get(username.toLowerCase());
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    return data.key === key ? (data.role || 'editor') : null;
+  } catch {
+    return stored === key ? 'admin' : null;
   }
 }
 

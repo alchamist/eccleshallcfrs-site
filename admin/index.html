@@ -92,6 +92,16 @@
     .btn-danger { background: #FDECEA; color: #9B1C1C; border: 1px solid #C62828; }
     .btn-danger:hover { background: #fca5a5; }
     .list-status { color: #6B7280; font-size: 0.9rem; padding: 1rem 0; text-align: center; }
+    /* User management */
+    .user-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #F3F4F6; gap: 1rem; }
+    .user-row:last-child { border-bottom: none; }
+    .user-name { font-size: 0.9rem; font-weight: 600; }
+    .badge-admin  { background: #EDE9FE; color: #4C1D95; }
+    .badge-editor { background: #DBEAFE; color: #1E40AF; }
+    .user-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .add-user-form { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #F3F4F6; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -218,7 +228,7 @@
     </div>
 
     <!-- Widget settings -->
-    <div class="card">
+    <div class="card" id="widgets-card">
       <h2>Homepage widgets</h2>
       <div class="toggle-row">
         <div class="toggle-label">
@@ -242,6 +252,41 @@
       </div>
       <div class="msg" id="widget-msg"></div>
     </div>
+
+    <!-- User management (admin only) -->
+    <div class="card" id="users-card" style="display:none;">
+      <div class="media-header">
+        <h2 style="margin-bottom:0">User management</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadUsers()">↻ Refresh</button>
+      </div>
+      <div id="users-list"><p class="list-status">Loading…</p></div>
+      <div class="add-user-form">
+        <h3 style="margin-bottom:1rem;">Add / update user</h3>
+        <div class="form-row">
+          <div class="field" style="margin-bottom:0;">
+            <label>Username</label>
+            <input type="text" id="new-username" placeholder="e.g. janedoe" spellcheck="false" autocomplete="off">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Role</label>
+            <select id="new-role" style="width:100%;padding:0.65rem 0.85rem;border:1px solid #D1D5DB;border-radius:6px;font-size:0.95rem;font-family:inherit;color:#1A1A1A;background:#fff;">
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:1rem;">
+          <label>Access key <span class="note">(share with the user — shown once)</span></label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" id="new-key" placeholder="Enter or generate a key" autocomplete="off" style="flex:1;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="generateKey()" style="white-space:nowrap;">Generate</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="saveUser()">Save user</button>
+      </div>
+      <div class="msg" id="users-msg"></div>
+    </div>
+
   </div>
 
 </div>
@@ -251,7 +296,8 @@
 var mde = null;
 var auth = {
   username: sessionStorage.getItem('cfr_u'),
-  key:      sessionStorage.getItem('cfr_k')
+  key:      sessionStorage.getItem('cfr_k'),
+  role:     sessionStorage.getItem('cfr_r')
 };
 var editPath = null;
 var mediaMode = 'insert';
@@ -435,15 +481,18 @@ function initEditor() {
 }
 
 function showEditor() {
+  var isAdmin = auth.role === 'admin';
   document.getElementById('login-view').style.display = 'none';
   document.getElementById('editor-view').style.display = '';
   document.getElementById('user-bar').style.display = '';
-  document.getElementById('user-label').textContent = 'Logged in as ' + auth.username;
+  document.getElementById('user-label').textContent = 'Logged in as ' + auth.username + (isAdmin ? ' · admin' : '');
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('widgets-card').style.display = isAdmin ? '' : 'none';
+  document.getElementById('users-card').style.display = isAdmin ? '' : 'none';
   initEditor();
   loadMedia();
   loadUpdates();
-  loadWidgetConfig();
+  if (isAdmin) { loadWidgetConfig(); loadUsers(); }
 }
 
 function showLogin() {
@@ -455,7 +504,8 @@ function showLogin() {
 function logout() {
   sessionStorage.removeItem('cfr_u');
   sessionStorage.removeItem('cfr_k');
-  auth = { username: null, key: null };
+  sessionStorage.removeItem('cfr_r');
+  auth = { username: null, key: null, role: null };
   window.location.href = '/';
 }
 
@@ -526,7 +576,8 @@ document.getElementById('login-form').addEventListener('submit', async function(
     if (res.ok && data.ok) {
       sessionStorage.setItem('cfr_u', username);
       sessionStorage.setItem('cfr_k', key);
-      auth = { username, key };
+      sessionStorage.setItem('cfr_r', data.role || 'editor');
+      auth = { username, key, role: data.role || 'editor' };
       showEditor();
     } else {
       showMsg('login-msg', 'err', 'Incorrect username or access key.');
@@ -652,6 +703,105 @@ document.getElementById('post-form').addEventListener('submit', async function(e
   }
   btn.disabled = false; btn.textContent = 'Publish update';
 });
+
+// User management
+async function loadUsers() {
+  var list = document.getElementById('users-list');
+  list.innerHTML = '<p class="list-status">Loading…</p>';
+  try {
+    var res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'list' })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.ok) { list.innerHTML = '<p class="list-status">Could not load users.</p>'; return; }
+    list.innerHTML = '';
+    data.users.forEach(function(u) {
+      var row = document.createElement('div');
+      row.className = 'user-row';
+      row.innerHTML =
+        '<div style="display:flex;align-items:center;gap:0.6rem;">' +
+          '<span class="user-name">' + escHtml(u.username) + '</span>' +
+          '<span class="badge badge-' + u.role + '">' + u.role + '</span>' +
+        '</div>' +
+        '<div class="user-actions">' +
+          '<button class="btn btn-ghost btn-sm edit-user-btn">Edit</button>' +
+          (u.username !== auth.username ? '<button class="btn btn-danger btn-sm del-user-btn">Delete</button>' : '') +
+        '</div>';
+      row.querySelector('.edit-user-btn').addEventListener('click', function() {
+        document.getElementById('new-username').value = u.username;
+        document.getElementById('new-role').value = u.role;
+        document.getElementById('new-key').value = '';
+        document.getElementById('new-key').placeholder = 'Leave blank to keep existing key';
+        document.getElementById('new-username').focus();
+      });
+      var delBtn = row.querySelector('.del-user-btn');
+      if (delBtn) delBtn.addEventListener('click', function() { deleteUser(u.username); });
+      list.appendChild(row);
+    });
+    if (!data.users.length) list.innerHTML = '<p class="list-status">No users found.</p>';
+  } catch (e) {
+    list.innerHTML = '<p class="list-status">Could not load users.</p>';
+  }
+}
+
+async function saveUser() {
+  var targetUser = document.getElementById('new-username').value.trim().toLowerCase();
+  var targetKey  = document.getElementById('new-key').value.trim() || undefined;
+  var targetRole = document.getElementById('new-role').value;
+  if (!targetUser) { showMsg('users-msg', 'err', 'Username is required.'); return; }
+  hideMsg('users-msg');
+  try {
+    var res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'create', targetUser, targetKey, targetRole })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      showMsg('users-msg', 'ok', '✓ User saved.');
+      document.getElementById('new-username').value = '';
+      document.getElementById('new-key').value = '';
+      document.getElementById('new-key').placeholder = 'Enter or generate a key';
+      document.getElementById('new-role').value = 'editor';
+      loadUsers();
+      setTimeout(function() { hideMsg('users-msg'); }, 3000);
+    } else {
+      showMsg('users-msg', 'err', '✗ ' + (data.error || 'Could not save user.'));
+    }
+  } catch (e) {
+    showMsg('users-msg', 'err', '✗ Could not connect.');
+  }
+}
+
+async function deleteUser(targetUser) {
+  if (!confirm('Delete user "' + targetUser + '"?\n\nThis cannot be undone.')) return;
+  try {
+    var res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'delete', targetUser })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      loadUsers();
+    } else {
+      alert('Delete failed: ' + (data.error || 'please try again'));
+    }
+  } catch (e) {
+    alert('Delete failed — please try again.');
+  }
+}
+
+function generateKey() {
+  var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var key = '';
+  var arr = new Uint8Array(20);
+  crypto.getRandomValues(arr);
+  arr.forEach(function(b) { key += chars[b % chars.length]; });
+  document.getElementById('new-key').value = key;
+}
 </script>
 </body>
 </html>

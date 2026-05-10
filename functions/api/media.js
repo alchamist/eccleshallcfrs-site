@@ -1,7 +1,7 @@
 export async function onRequestPost({ request, env }) {
   try {
     const { username, key } = await request.json();
-    if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
+    if (!await getRole(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
 
     const listed = await env.MEDIA_BUCKET.list();
     const images = listed.objects
@@ -18,10 +18,16 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
-async function checkAuth(env, username, key) {
-  if (!username || !key) return false;
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-  return stored === key;
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    return data.key === key ? (data.role || 'editor') : null;
+  } catch {
+    return stored === key ? 'admin' : null;
+  }
 }
 
 function json(body, status = 200) {
