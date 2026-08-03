@@ -13,13 +13,13 @@ Plain, dependency-free static site — no build step, no framework, no `package.
   - News/updates are markdown files in `updates/` (created via the admin panel), read through the GitHub Contents API
   - Admin users, homepage widget toggles, and login rate-limit counters are stored in a Cloudflare KV namespace (`CFR_ADMINS`)
   - Uploaded images are stored in an R2 bucket (`MEDIA_BUCKET`), served from `media.eccleshallcfrs.org.uk`
-- **Facebook Page Plugin** embedded on the homepage (Page ID `131270403575068`) behind a click-to-load consent gate, as the primary channel for day-to-day updates
+- **Facebook** is the primary channel for day-to-day updates — the homepage links out to the page (`131270403575068`) with a "Follow us" CTA rather than embedding the Page Plugin (the embed was unreliable: ad blockers and third-party-cookie restrictions frequently left its timeline stuck loading)
 
 ## Site structure
 
 | Path | Purpose |
 |---|---|
-| `index.html` | Homepage — hero, "Who We Are", optional on-duty/stats widgets, Facebook feed, latest news, donate CTA |
+| `index.html` | Homepage — hero, "Who We Are", optional on-duty/stats widgets, Facebook follow CTA, latest news, donate CTA |
 | `about.html` | What the scheme does, Queen's Award for Voluntary Service (2017) |
 | `volunteer.html` | How to get involved, as a responder or in a supporting role |
 | `donate.html` | JustGiving link, standing order bank details, Gift Aid, sponsorship tiers |

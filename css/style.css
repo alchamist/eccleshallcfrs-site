@@ -135,15 +135,8 @@ p  { color: var(--muted); }
 .read-more { margin-top: auto; font-size: 0.88rem; font-weight: 600; color: var(--green-2); text-decoration: none; }
 .read-more:hover { color: var(--green); text-decoration: underline; }
 
-/* ---- Facebook feed ---- */
+/* ---- Facebook CTA ---- */
 .fb-section { padding: 3.5rem 0; background: var(--bg-alt); }
-.fb-wrapper {
-  max-width: 500px; margin: 0 auto;
-  background: #fff; border-radius: var(--radius);
-  border: 1px solid var(--border); overflow: hidden;
-}
-.fb-consent { padding: 2.5rem 1.5rem; text-align: center; }
-.fb-consent p { margin-bottom: 1.1rem; font-size: 0.9rem; }
 
 /* ---- Donate strip ---- */
 .donate-strip { background: var(--red); color: #fff; padding: 3rem 0; text-align: center; }
