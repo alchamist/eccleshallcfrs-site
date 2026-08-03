@@ -118,18 +118,11 @@
         <h2>Latest from Facebook</h2>
         <p>Follow us on Facebook — that's where we post news, fundraisers, and updates from the team.</p>
       </div>
-      <div class="fb-wrapper">
-        <iframe
-          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F131270403575068&tabs=timeline&width=500&height=600&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
-          width="500"
-          height="600"
-          style="border:none;overflow:hidden;max-width:100%;display:block;margin:0 auto;"
-          scrolling="no"
-          frameborder="0"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          loading="lazy"
-          title="Eccleshall CFRs on Facebook">
-        </iframe>
+      <div class="fb-wrapper" id="fb-wrapper">
+        <div class="fb-consent" id="fb-consent">
+          <p>This section loads content from Facebook, which sets third-party cookies once you load it.</p>
+          <button type="button" class="btn btn-outline" id="fb-load-btn">Load Facebook feed</button>
+        </div>
       </div>
       <div style="text-align:center;margin-top:1.25rem;">
         <a href="https://www.facebook.com/131270403575068" target="_blank" rel="noopener" class="btn btn-outline">View our Facebook page →</a>
@@ -208,6 +201,18 @@
       t.setAttribute('aria-expanded', String(open));
     });
   })();
+
+  (function() {
+    var btn = document.getElementById('fb-load-btn');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      document.getElementById('fb-wrapper').innerHTML =
+        '<iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F131270403575068&tabs=timeline&width=500&height=600&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"' +
+        ' width="500" height="600" style="border:none;overflow:hidden;max-width:100%;display:block;margin:0 auto;" scrolling="no" frameborder="0"' +
+        ' allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" loading="lazy" title="Eccleshall CFRs on Facebook"></iframe>';
+    });
+  })();
+
   initUpdatesList('latest-news', 3);
 
   (async function() {

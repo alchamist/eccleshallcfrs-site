@@ -142,6 +142,8 @@ p  { color: var(--muted); }
   background: #fff; border-radius: var(--radius);
   border: 1px solid var(--border); overflow: hidden;
 }
+.fb-consent { padding: 2.5rem 1.5rem; text-align: center; }
+.fb-consent p { margin-bottom: 1.1rem; font-size: 0.9rem; }
 
 /* ---- Donate strip ---- */
 .donate-strip { background: var(--red); color: #fff; padding: 3rem 0; text-align: center; }

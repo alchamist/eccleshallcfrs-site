@@ -1,7 +1,7 @@
 export async function onRequestPost({ request, env }) {
   try {
     const { username, key } = await request.json();
-    if (!await checkAuth(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
+    if (!await getRole(env, username, key)) return json({ ok: false, error: 'Unauthorised' }, 401);
 
     const repo = env.GITHUB_REPO;
     const token = env.GITHUB_TOKEN;
@@ -56,10 +56,29 @@ function parseFrontmatter(text) {
   return { meta, content: match[2].trim() };
 }
 
-async function checkAuth(env, username, key) {
-  if (!username || !key) return false;
+async function timingSafeEqual(a, b) {
+  const enc = new TextEncoder();
+  const [ha, hb] = await Promise.all([
+    crypto.subtle.digest('SHA-256', enc.encode(a || '')),
+    crypto.subtle.digest('SHA-256', enc.encode(b || ''))
+  ]);
+  const va = new Uint8Array(ha), vb = new Uint8Array(hb);
+  let diff = 0;
+  for (let i = 0; i < va.length; i++) diff |= va[i] ^ vb[i];
+  return diff === 0;
+}
+
+async function getRole(env, username, key) {
+  if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
-  return stored === key;
+  if (!stored) return null;
+  try {
+    const data = JSON.parse(stored);
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return (await timingSafeEqual(data.key, key)) ? (data.role || 'editor') : null;
+    }
+  } catch { /* not JSON object — fall through */ }
+  return (await timingSafeEqual(stored, key)) ? 'admin' : null;
 }
 
 function json(body, status = 200) {

@@ -10,7 +10,7 @@ export async function onRequestPost({ request, env }) {
       const { keys } = await env.CFR_ADMINS.list();
       const users = [];
       for (const k of keys) {
-        if (k.name.startsWith('cfg:')) continue;
+        if (k.name.startsWith('cfg:') || k.name.startsWith('ratelimit:')) continue;
         const val = await env.CFR_ADMINS.get(k.name);
         let userRole = 'admin';
         try { userRole = JSON.parse(val).role || 'editor'; } catch {}
@@ -23,7 +23,7 @@ export async function onRequestPost({ request, env }) {
       if (!targetUser || !targetRole) return json({ ok: false, error: 'Missing fields' }, 400);
       if (!['admin', 'editor'].includes(targetRole)) return json({ ok: false, error: 'Invalid role' }, 400);
       const safeUser = targetUser.toLowerCase().trim();
-      if (!safeUser || safeUser.startsWith('cfg:')) return json({ ok: false, error: 'Invalid username' }, 400);
+      if (!safeUser || safeUser.startsWith('cfg:') || safeUser.startsWith('ratelimit:')) return json({ ok: false, error: 'Invalid username' }, 400);
 
       let finalKey = targetKey;
       if (!finalKey) {
@@ -51,6 +51,18 @@ export async function onRequestPost({ request, env }) {
   }
 }
 
+async function timingSafeEqual(a, b) {
+  const enc = new TextEncoder();
+  const [ha, hb] = await Promise.all([
+    crypto.subtle.digest('SHA-256', enc.encode(a || '')),
+    crypto.subtle.digest('SHA-256', enc.encode(b || ''))
+  ]);
+  const va = new Uint8Array(ha), vb = new Uint8Array(hb);
+  let diff = 0;
+  for (let i = 0; i < va.length; i++) diff |= va[i] ^ vb[i];
+  return diff === 0;
+}
+
 async function getRole(env, username, key) {
   if (!username || !key) return null;
   const stored = await env.CFR_ADMINS.get(username.toLowerCase());
@@ -58,10 +70,10 @@ async function getRole(env, username, key) {
   try {
     const data = JSON.parse(stored);
     if (data && typeof data === 'object' && !Array.isArray(data)) {
-      return data.key === key ? (data.role || 'editor') : null;
+      return (await timingSafeEqual(data.key, key)) ? (data.role || 'editor') : null;
     }
   } catch { /* not JSON object — fall through */ }
-  return stored === key ? 'admin' : null;
+  return (await timingSafeEqual(stored, key)) ? 'admin' : null;
 }
 
 function json(body, status = 200) {
