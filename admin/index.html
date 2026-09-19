@@ -274,7 +274,7 @@
       </div>
       <div id="supporters-list"><p class="list-status">Loading…</p></div>
       <div class="add-user-form">
-        <h3 style="margin-bottom:1rem;">Add a supporter</h3>
+        <h3 style="margin-bottom:1rem;" id="supporter-form-heading">Add a supporter</h3>
         <div class="field">
           <label for="supporter-name">Name *</label>
           <input type="text" id="supporter-name" placeholder="e.g. Eccleshall Hardware" maxlength="100" autocomplete="off">
@@ -311,7 +311,10 @@
             <span class="toggle-slider"></span>
           </label>
         </div>
-        <button type="button" class="btn btn-primary" id="supporter-add-btn" onclick="addSupporter()">Add supporter</button>
+        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary" id="supporter-add-btn" onclick="saveSupporter()">Add supporter</button>
+          <button type="button" class="btn btn-ghost" id="supporter-cancel-btn" style="display:none;" onclick="resetSupporterForm()">Cancel</button>
+        </div>
       </div>
       <div class="msg" id="supporters-msg"></div>
     </div>
@@ -795,7 +798,11 @@ function renderSupporters(supporters) {
         '<div class="supporter-name">' + escHtml(s.name) + '</div>' +
         '<div class="supporter-meta">' + escHtml(s.url || 'No link') + (s.caption ? ' · ' + escHtml(s.caption) : '') + '</div>' +
       '</div>' +
-      '<div class="user-actions"><button class="btn btn-danger btn-sm rm-supporter-btn">Remove</button></div>';
+      '<div class="user-actions">' +
+        '<button class="btn btn-ghost btn-sm edit-supporter-btn">Edit</button>' +
+        '<button class="btn btn-danger btn-sm rm-supporter-btn">Remove</button>' +
+      '</div>';
+    row.querySelector('.edit-supporter-btn').addEventListener('click', function() { startEditSupporter(s); });
     row.querySelector('.rm-supporter-btn').addEventListener('click', function() { removeSupporter(s.id, s.name); });
     list.appendChild(row);
   });
@@ -809,8 +816,41 @@ function updateSupporterPreview() {
   box.innerHTML = url ? '<img src="' + escHtml(url) + '" alt="">' : '';
 }
 
-async function addSupporter() {
+var editSupporterId = null;
+
+function startEditSupporter(s) {
+  editSupporterId = s.id;
+  document.getElementById('supporter-form-heading').textContent = 'Edit supporter';
+  document.getElementById('supporter-add-btn').textContent = 'Save changes';
+  document.getElementById('supporter-cancel-btn').style.display = '';
+  document.getElementById('supporter-name').value = s.name;
+  document.getElementById('supporter-logo').value = s.logo;
+  document.getElementById('supporter-url').value = s.url || '';
+  document.getElementById('supporter-caption').value = s.caption || '';
+  document.getElementById('supporter-dark').checked = !!s.dark;
+  document.getElementById('supporter-upload-status').textContent = '';
+  updateSupporterPreview();
+  hideMsg('supporters-msg');
+  document.getElementById('supporter-form-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetSupporterForm() {
+  editSupporterId = null;
+  document.getElementById('supporter-form-heading').textContent = 'Add a supporter';
+  document.getElementById('supporter-add-btn').textContent = 'Add supporter';
+  document.getElementById('supporter-cancel-btn').style.display = 'none';
+  document.getElementById('supporter-name').value = '';
+  document.getElementById('supporter-logo').value = '';
+  document.getElementById('supporter-url').value = '';
+  document.getElementById('supporter-caption').value = '';
+  document.getElementById('supporter-dark').checked = false;
+  document.getElementById('supporter-upload-status').textContent = '';
+  updateSupporterPreview();
+}
+
+async function saveSupporter() {
   var btn = document.getElementById('supporter-add-btn');
+  var wasEdit = !!editSupporterId;
   hideMsg('supporters-msg');
   var supporter = {
     name:    document.getElementById('supporter-name').value.trim(),
@@ -828,22 +868,24 @@ async function addSupporter() {
     var res = await fetch('/api/supporters', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'add', supporter: supporter })
+      body: JSON.stringify({
+        username: auth.username,
+        key: auth.key,
+        action: wasEdit ? 'update' : 'add',
+        supporter: supporter,
+        ...(wasEdit ? { id: editSupporterId } : {})
+      })
     });
     var data = await res.json();
     if (res.ok && data.ok) {
-      showMsg('supporters-msg', 'ok', '✓ Supporter added — it will appear on the Supporters page straight away.');
-      document.getElementById('supporter-name').value = '';
-      document.getElementById('supporter-logo').value = '';
-      document.getElementById('supporter-url').value = '';
-      document.getElementById('supporter-caption').value = '';
-      document.getElementById('supporter-dark').checked = false;
-      document.getElementById('supporter-upload-status').textContent = '';
-      updateSupporterPreview();
+      showMsg('supporters-msg', 'ok', wasEdit
+        ? '✓ Supporter updated — changes will appear on the Supporters page straight away.'
+        : '✓ Supporter added — it will appear on the Supporters page straight away.');
+      resetSupporterForm();
       renderSupporters(data.supporters);
       setTimeout(function() { hideMsg('supporters-msg'); }, 3000);
     } else {
-      showMsg('supporters-msg', 'err', '✗ ' + (data.error || 'Could not add supporter.'));
+      showMsg('supporters-msg', 'err', '✗ ' + (data.error || 'Could not save supporter.'));
     }
   } catch (e) {
     showMsg('supporters-msg', 'err', '✗ Could not connect.');
@@ -861,6 +903,7 @@ async function removeSupporter(id, name) {
     });
     var data = await res.json();
     if (res.ok && data.ok) {
+      if (editSupporterId === id) resetSupporterForm();
       renderSupporters(data.supporters);
     } else {
       alert('Remove failed: ' + (data.error || 'please try again'));

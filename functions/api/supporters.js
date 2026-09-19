@@ -1,6 +1,6 @@
 // Supporters list shown on sponsors.html ("Our Supporters").
 //   GET  — public, returns the list (falls back to DEFAULTS until an admin first saves a change)
-//   POST — admin only, { action: 'add' | 'remove', ... }
+//   POST — admin only, { action: 'add' | 'update' | 'remove', ... }
 // Logos are uploaded via /api/upload (R2); this endpoint only stores the list in KV.
 const KV_KEY = 'cfg:supporters';
 
@@ -43,6 +43,17 @@ export async function onRequestPost({ request, env }) {
       const clean = validateSupporter(supporter);
       if (clean.error) return json({ ok: false, error: clean.error }, 400);
       supporters.push({ id: crypto.randomUUID(), ...clean.value });
+      await env.CFR_ADMINS.put(KV_KEY, JSON.stringify(supporters));
+      return json({ ok: true, supporters });
+    }
+
+    if (action === 'update') {
+      if (!id) return json({ ok: false, error: 'Missing supporter id' }, 400);
+      const index = supporters.findIndex(s => s.id === id);
+      if (index === -1) return json({ ok: false, error: 'Supporter not found' }, 404);
+      const clean = validateSupporter(supporter);
+      if (clean.error) return json({ ok: false, error: clean.error }, 400);
+      supporters[index] = { id, ...clean.value };
       await env.CFR_ADMINS.put(KV_KEY, JSON.stringify(supporters));
       return json({ ok: true, supporters });
     }
