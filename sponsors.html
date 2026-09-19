@@ -56,20 +56,11 @@
     <div class="container">
       <p style="max-width:640px;margin-bottom:2.5rem;">Eccleshall CFRs receives no central funding — we rely entirely on donations, fundraising, and the generosity of local businesses and grant-making organisations. The supporters listed here have made a direct and lasting difference to what we can do for the community.</p>
 
-      <div class="sponsor-grid">
-
-        <!-- National Lottery Community Fund -->
-        <div class="sponsor-card" style="background:#fff;">
-          <img src="images/nlcf-logo.png" alt="The National Lottery Community Fund" style="max-width:220px;">
-        </div>
-
-        <!-- Gentili -->
-        <a href="https://gentili.uk.com/" target="_blank" rel="noopener" class="sponsor-card sponsor-card-dark" style="text-decoration:none;">
-          <img src="https://gentili.uk.com/wp-content/uploads/2025/03/Gentili-white-o.png" alt="Gentili" style="margin-bottom:0.75rem;">
-          <p class="sponsor-card-desc">Proud supporter of Eccleshall CFRs</p>
-        </a>
-
+      <!-- Populated by js/supporters.js from /api/supporters (managed in /admin) -->
+      <div class="sponsor-grid" id="supporters-grid">
+        <p>Loading supporters…</p>
       </div>
+      <noscript><p>Please enable JavaScript to see our supporters.</p></noscript>
     </div>
   </section>
 
@@ -119,7 +110,9 @@
   </div>
 </footer>
 
+<script src="js/supporters.js"></script>
 <script>
+  initSupporters('supporters-grid');
   (function() {
     var t = document.querySelector('.nav-toggle');
     var m = document.querySelector('.nav-links');

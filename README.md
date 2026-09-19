@@ -19,18 +19,18 @@ Plain, dependency-free static site — no build step, no framework, no `package.
 
 | Path | Purpose |
 |---|---|
-| `index.html` | Homepage — hero, "Who We Are", optional on-duty/stats widgets, Facebook follow CTA, latest news, donate CTA |
+| `index.html` | Homepage — hero, "Who We Are", optional on-duty/stats widgets, latest news, Facebook follow CTA, donate CTA |
 | `about.html` | What the scheme does, Queen's Award for Voluntary Service (2017) |
 | `volunteer.html` | How to get involved, as a responder or in a supporting role |
 | `donate.html` | JustGiving link, standing order bank details, Gift Aid, sponsorship tiers |
 | `contact.html` | Contact form (submits to Formspree), email/Facebook links |
 | `updates.html` / `update.html` | Full news list / single-article view, rendered client-side from `updates/*.md` |
-| `sponsors.html` | Supporter/sponsor logos |
+| `sponsors.html` | Supporters page — logo grid rendered from `/api/supporters` (managed in the admin panel) |
 | `defib.html` | Public defibrillator (AED) location links |
 | `404.html` | Custom not-found page |
 | `admin/index.html` | Self-hosted admin panel (see below) |
 
-Shared styling lives in `css/style.css`; shared update-rendering logic lives in `js/updates.js`, which reads from the public `/api/public-updates` endpoint (not GitHub directly — see below).
+Shared styling lives in `css/style.css`; shared update-rendering logic lives in `js/updates.js`, which reads from the public `/api/public-updates` endpoint (not GitHub directly — see below). `js/supporters.js` renders the Supporters page grid.
 
 ## Admin panel
 
@@ -42,6 +42,7 @@ Shared styling lives in `css/style.css`; shared update-rendering logic lives in 
 - `upload.js` / `media.js` — upload images to R2 and browse the media library
 - `config.js` — admin-only toggles for the homepage "On Duty" badge and hours/incidents stats strip
 - `users.js` — admin-only user management (create/list/delete editor & admin accounts)
+- `supporters.js` — the Supporters page logo list: public GET, admin-only add/remove (logos are uploaded via `upload.js`; the list is stored in KV as `cfg:supporters`)
 - `public-updates.js` — public, unauthenticated, edge-cached (60s) list of published/non-expired updates, fetched from GitHub with the server's token; this is what the public pages read instead of calling GitHub's (rate-limited) API from every visitor's browser
 
 Publishing writes a markdown file with YAML-ish frontmatter (`title`, `date`, `summary`, `image`, `status`, `end_date`) straight to the `updates/` folder on `main`. Every other admin endpoint that checks a login authenticates with the same constant-time comparison as `login.js`.
@@ -52,7 +53,7 @@ The single-update view (`update.html`) renders update bodies with `marked` and s
 
 | Binding | Type | Used for |
 |---|---|---|
-| `CFR_ADMINS` | KV namespace | admin/editor accounts, widget config |
+| `CFR_ADMINS` | KV namespace | admin/editor accounts, widget config, supporters list |
 | `MEDIA_BUCKET` | R2 bucket | uploaded images |
 | `GITHUB_REPO` | env var | e.g. `alchamist/eccleshallcfrs-site` |
 | `GITHUB_TOKEN` | secret | GitHub PAT with contents read/write on this repo |

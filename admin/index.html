@@ -100,6 +100,16 @@
     .badge-editor { background: #DBEAFE; color: #1E40AF; }
     .user-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
     .add-user-form { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #F3F4F6; }
+    /* Supporters */
+    .supporter-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #F3F4F6; gap: 1rem; }
+    .supporter-row:last-child { border-bottom: none; }
+    .supporter-thumb { width: 96px; height: 52px; border: 1px solid #E0E0E0; border-radius: 6px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 4px; }
+    .supporter-thumb-dark { background: #1C3B6A; border-color: #1C3B6A; }
+    .supporter-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .supporter-info { min-width: 0; flex: 1; }
+    .supporter-name { font-size: 0.9rem; font-weight: 600; }
+    .supporter-meta { font-size: 0.8rem; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #supporter-file { display: none; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
   </style>
@@ -251,6 +261,59 @@
         </label>
       </div>
       <div class="msg" id="widget-msg"></div>
+    </div>
+
+    <!-- Supporters (admin only) -->
+    <div class="card" id="supporters-card" style="display:none;">
+      <div class="media-header">
+        <div>
+          <h2 style="margin-bottom:0">Supporters</h2>
+          <p class="media-hint">Logos shown on the public <a href="/sponsors.html" target="_blank" rel="noopener">Supporters page</a>.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadSupporters()">↻ Refresh</button>
+      </div>
+      <div id="supporters-list"><p class="list-status">Loading…</p></div>
+      <div class="add-user-form">
+        <h3 style="margin-bottom:1rem;">Add a supporter</h3>
+        <div class="field">
+          <label for="supporter-name">Name *</label>
+          <input type="text" id="supporter-name" placeholder="e.g. Eccleshall Hardware" maxlength="100" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="supporter-logo">Logo * <span class="note">(paste an image URL, or upload one)</span></label>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="supporter-logo" placeholder="https://…" autocomplete="off" spellcheck="false" style="flex:1;min-width:200px;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('supporter-file').click()">📎 Upload</button>
+            <input type="file" id="supporter-file" accept="image/png,image/jpeg,image/gif,image/webp">
+          </div>
+          <div style="display:flex;gap:0.75rem;align-items:center;margin-top:0.5rem;">
+            <div class="supporter-thumb" id="supporter-preview" style="display:none;"></div>
+            <span id="supporter-upload-status" style="font-size:0.82rem;color:#6B7280;"></span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="margin-bottom:0;">
+            <label for="supporter-url">Website <span class="note">(optional — makes the logo a link)</span></label>
+            <input type="text" id="supporter-url" placeholder="https://…" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label for="supporter-caption">Caption <span class="note">(optional)</span></label>
+            <input type="text" id="supporter-caption" placeholder="e.g. Proud supporter of Eccleshall CFRs" maxlength="120" autocomplete="off">
+          </div>
+        </div>
+        <div class="toggle-row" style="margin:0.75rem 0 1.25rem;">
+          <div class="toggle-label">
+            <strong>Dark background</strong>
+            <p>Use for white or light-coloured logos, which would disappear on the default white card</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="supporter-dark" onchange="updateSupporterPreview()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button type="button" class="btn btn-primary" id="supporter-add-btn" onclick="addSupporter()">Add supporter</button>
+      </div>
+      <div class="msg" id="supporters-msg"></div>
     </div>
 
     <!-- User management (admin only) -->
@@ -488,11 +551,12 @@ function showEditor() {
   document.getElementById('user-label').textContent = 'Logged in as ' + auth.username + (isAdmin ? ' · admin' : '');
   document.getElementById('date').value = new Date().toISOString().slice(0, 10);
   document.getElementById('widgets-card').style.display = isAdmin ? '' : 'none';
+  document.getElementById('supporters-card').style.display = isAdmin ? '' : 'none';
   document.getElementById('users-card').style.display = isAdmin ? '' : 'none';
   initEditor();
   loadMedia();
   loadUpdates();
-  if (isAdmin) { loadWidgetConfig(); loadUsers(); }
+  if (isAdmin) { loadWidgetConfig(); loadSupporters(); loadUsers(); }
 }
 
 function showLogin() {
@@ -702,6 +766,137 @@ document.getElementById('post-form').addEventListener('submit', async function(e
     showMsg('post-msg', 'err', '✗ Could not connect — please try again.');
   }
   btn.disabled = false; btn.textContent = 'Publish update';
+});
+
+// Supporters
+async function loadSupporters() {
+  var list = document.getElementById('supporters-list');
+  list.innerHTML = '<p class="list-status">Loading…</p>';
+  try {
+    var res = await fetch('/api/supporters');
+    var data = await res.json();
+    if (!res.ok || !data.ok) { list.innerHTML = '<p class="list-status">Could not load supporters.</p>'; return; }
+    renderSupporters(data.supporters);
+  } catch (e) {
+    list.innerHTML = '<p class="list-status">Could not load supporters.</p>';
+  }
+}
+
+function renderSupporters(supporters) {
+  var list = document.getElementById('supporters-list');
+  if (!supporters.length) { list.innerHTML = '<p class="list-status">No supporters listed yet.</p>'; return; }
+  list.innerHTML = '';
+  supporters.forEach(function(s) {
+    var row = document.createElement('div');
+    row.className = 'supporter-row';
+    row.innerHTML =
+      '<div class="supporter-thumb' + (s.dark ? ' supporter-thumb-dark' : '') + '"><img src="' + escHtml(s.logo) + '" alt=""></div>' +
+      '<div class="supporter-info">' +
+        '<div class="supporter-name">' + escHtml(s.name) + '</div>' +
+        '<div class="supporter-meta">' + escHtml(s.url || 'No link') + (s.caption ? ' · ' + escHtml(s.caption) : '') + '</div>' +
+      '</div>' +
+      '<div class="user-actions"><button class="btn btn-danger btn-sm rm-supporter-btn">Remove</button></div>';
+    row.querySelector('.rm-supporter-btn').addEventListener('click', function() { removeSupporter(s.id, s.name); });
+    list.appendChild(row);
+  });
+}
+
+function updateSupporterPreview() {
+  var url = document.getElementById('supporter-logo').value.trim();
+  var box = document.getElementById('supporter-preview');
+  box.className = 'supporter-thumb' + (document.getElementById('supporter-dark').checked ? ' supporter-thumb-dark' : '');
+  box.style.display = url ? '' : 'none';
+  box.innerHTML = url ? '<img src="' + escHtml(url) + '" alt="">' : '';
+}
+
+async function addSupporter() {
+  var btn = document.getElementById('supporter-add-btn');
+  hideMsg('supporters-msg');
+  var supporter = {
+    name:    document.getElementById('supporter-name').value.trim(),
+    logo:    document.getElementById('supporter-logo').value.trim(),
+    url:     document.getElementById('supporter-url').value.trim(),
+    caption: document.getElementById('supporter-caption').value.trim(),
+    dark:    document.getElementById('supporter-dark').checked
+  };
+  if (!supporter.name || !supporter.logo) {
+    showMsg('supporters-msg', 'err', 'A name and a logo are required.');
+    return;
+  }
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/supporters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'add', supporter: supporter })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      showMsg('supporters-msg', 'ok', '✓ Supporter added — it will appear on the Supporters page straight away.');
+      document.getElementById('supporter-name').value = '';
+      document.getElementById('supporter-logo').value = '';
+      document.getElementById('supporter-url').value = '';
+      document.getElementById('supporter-caption').value = '';
+      document.getElementById('supporter-dark').checked = false;
+      document.getElementById('supporter-upload-status').textContent = '';
+      updateSupporterPreview();
+      renderSupporters(data.supporters);
+      setTimeout(function() { hideMsg('supporters-msg'); }, 3000);
+    } else {
+      showMsg('supporters-msg', 'err', '✗ ' + (data.error || 'Could not add supporter.'));
+    }
+  } catch (e) {
+    showMsg('supporters-msg', 'err', '✗ Could not connect.');
+  }
+  btn.disabled = false;
+}
+
+async function removeSupporter(id, name) {
+  if (!confirm('Remove "' + name + '" from the Supporters page?')) return;
+  try {
+    var res = await fetch('/api/supporters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: auth.username, key: auth.key, action: 'remove', id: id })
+    });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      renderSupporters(data.supporters);
+    } else {
+      alert('Remove failed: ' + (data.error || 'please try again'));
+    }
+  } catch (e) {
+    alert('Remove failed — please try again.');
+  }
+}
+
+document.getElementById('supporter-logo').addEventListener('input', updateSupporterPreview);
+
+// Supporter logo upload — same /api/upload as the media library; fills in the logo URL
+document.getElementById('supporter-file').addEventListener('change', async function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('supporter-upload-status');
+  statusEl.textContent = 'Uploading…';
+  var fd = new FormData();
+  fd.append('username', auth.username);
+  fd.append('key', auth.key);
+  fd.append('file', file);
+  try {
+    var res = await fetch('/api/upload', { method: 'POST', body: fd });
+    var data = await res.json();
+    if (res.ok && data.ok) {
+      document.getElementById('supporter-logo').value = data.url;
+      updateSupporterPreview();
+      statusEl.textContent = '✓ ' + file.name + ' uploaded';
+      loadMedia();
+    } else {
+      statusEl.textContent = '✗ Upload failed — ' + (data.error || 'try again');
+    }
+  } catch (err) {
+    statusEl.textContent = '✗ Upload failed.';
+  }
+  e.target.value = '';
 });
 
 // User management
